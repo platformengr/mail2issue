@@ -1,0 +1,30 @@
+{
+  "name": "mail2isseus",
+  "version": "1.0.0",
+  "description": "github action that make issues of emails",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abrahamberg/mail2issue.git"
+  },
+  "author": "Daniel Abrahamberg",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/abrahamberg/mail2issue/issues"
+  },
+  "homepage": "https://github.com/abrahamberg/mail2issue#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.12.12",
+    "@vercel/ncc": "^0.38.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5",
+    "pretty-quick": "^4.0.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
