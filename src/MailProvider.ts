@@ -2,10 +2,8 @@ import Imap from "imap";
 import { simpleParser, Headers } from "mailparser";
 import nodemailer from "nodemailer";
 
-/**
- * Represents a mailbox for sending and fetching emails.
- */
-export default class MailBox {
+
+export default class MailProvider {
   private readonly emailAddress: string;
   private readonly password: string;
   private readonly imap: Imap;
@@ -210,5 +208,6 @@ export interface FetchedEmail {
   subject: string;
   body: string;
   date: Date;
+  replyTo: string | undefined;
   attachments: any[];
 }

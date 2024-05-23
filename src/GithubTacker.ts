@@ -1,15 +1,18 @@
-import MailBox, { FetchedEmail } from "./MailsBox";
-import GithubApi from "./github-api";
+import MailProvider, { FetchedEmail } from "./MailProvider";
+import IssueProvider from "./IssueProvider";
+import StateProvider from "./StateProvider"
 
 const NUMBER_OF_EMAILS = 30;
 const DAYS_BACK = 1;
 class GithubTacker {
-  private mailbox: MailBox;
+  private mailbox: MailProvider;
   private github;
+  private state;
 
-  constructor(mailbox: MailBox, gitHub: GithubApi) {
-    this.mailbox = mailbox;
-    this.github = gitHub;
+  constructor(mail: MailProvider, issue: IssueProvider, state: StateProvider) {
+    this.mailbox = mail;
+    this.github = issue;
+    this.state = state;
   }
 
   private async getIncomingByUid(lastSynced: string) {
@@ -31,7 +34,20 @@ class GithubTacker {
   private handleNewTicket(mail: FetchedEmail) {
     const title = mail.subject;
     const body = mail.body;
-    this.github.createIssue(title, body);
+    this.github.createIssue({
+      title,
+      body,
+      meta: {
+        from: mail.senders,
+        toReceivers: mail.toReivers,
+        ccReceivers: mail.ccReivers,
+        replyTo: mail.replyTo,
+        uid: mail.uid,
+        messageId: mail.messageId,
+        type: "original",
+      },
+    
+    });
   }
 
   private handleReplay(mail: FetchedEmail, regex: RegExp) {
@@ -51,10 +67,11 @@ class GithubTacker {
   }
 
   public async syncIncoming(): Promise<void> {
-    const lastSynced = await this.github.getVariables("lastSynced");
-    let incoming;
-    if (!lastSynced) incoming = await this.getIncomingByDays(DAYS_BACK);
-    else incoming = await this.getIncomingByUid(lastSynced);
+    const lastSynced = await this.state.lastSynced.get();
+    const incoming = (lastSynced) ?
+      await this.getIncomingByUid(lastSynced)
+      : await this.getIncomingByDays(DAYS_BACK);
+
     incoming.forEach(this.handleIncoming);
   }
 }

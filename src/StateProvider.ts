@@ -1,6 +1,6 @@
 import * as github from "@actions/github";
 
-export default class GithubApi {
+export default class StateProvider {
   private readonly octokit;
   private readonly base;
 
@@ -12,33 +12,8 @@ export default class GithubApi {
     };
   }
 
-  async createIssue(title: string, body: string) {
-    const newIssue = await this.octokit.rest.issues.create({
-      ...this.base,
-      title: title,
-      body: body,
-    });
-    return newIssue;
-  }
 
-  async getIssues(id: number) {
-    const issue = await this.octokit.rest.issues.get({
-      ...this.base,
-      issue_number: id,
-    });
-    return issue;
-  }
-
-  async commentIssue(id: number, body: string) {
-    const newComment = await this.octokit.rest.issues.createComment({
-      ...this.base,
-      issue_number: id,
-      body: body,
-    });
-    return newComment;
-  }
-
-  async setVariables(name: string, value: string) {
+  private async setVariables(name: string, value: string) {
     return await this.octokit.request(
       "POST /repos/{owner}/{repo}/actions/variables",
       {
@@ -52,7 +27,7 @@ export default class GithubApi {
     );
   }
 
-  async updateVariables(name: string, value: string) {
+  private async updateVariables(name: string, value: string) {
     return await this.octokit.request(
       "PATCH /repos/{owner}/{repo}/actions/variables/{name}",
       {
@@ -66,7 +41,7 @@ export default class GithubApi {
     );
   }
 
-  async setOrUpdateVariables(name: string, value: string) {
+  private async setOrUpdateVariables(name: string, value: string) {
     try {
       await this.updateVariables(name, value);
     } catch (error: any) {
@@ -75,7 +50,7 @@ export default class GithubApi {
     }
   }
 
-  async getVariables(name: string) {
+  private async getVariables(name: string) {
     try {
       return (
         await this.octokit.request(
@@ -94,4 +69,11 @@ export default class GithubApi {
       throw error;
     }
   }
+
+public lastSynced = {
+    get: async () => await this.getVariables("lastSynced"),
+    set: async (value: string) => await this.setOrUpdateVariables("lastSynced", value),
+}
+
+
 }
