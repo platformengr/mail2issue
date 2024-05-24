@@ -4,7 +4,7 @@
   "description": "github action that make issues of emails",
   "main": "index.js",
   "scripts": {
-    "build": "ncc build index.js  -s -o dist",
+    "build": "ncc build src/action.ts  -s -o dist",
     "test": "jest",
     "format": "pretty-quick --no-restage",
     "format:staged": "pretty-quick --staged",
