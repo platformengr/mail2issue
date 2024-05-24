@@ -12,7 +12,7 @@ import Mail2Issue from './Mail2Issue';
 async function run() {
 
 
-    const token = process.env.GITHUB_TOKEN;
+    const token = core.getInput('token');
     if (!token) throw new Error('GITHUB_TOKEN is required');
     const mailConfig = JSON.parse(core.getInput('mail-config')) as MailProviderOptions;
     const task = core.getInput('task');
