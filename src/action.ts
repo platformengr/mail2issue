@@ -10,7 +10,7 @@ import Mail2Issue from './Mail2Issue';
 
 
 async function run() {
-  try {
+
 
     const token = process.env.GITHUB_TOKEN;
     if (!token) throw new Error('GITHUB_TOKEN is required');
@@ -27,11 +27,6 @@ async function run() {
     else throw new Error('Invalid task');
 
 
-  } catch (error ) {
-    core.error(JSON.stringify(error,
-      Object.getOwnPropertyNames(error)
-    ));
-  }
 }
 
 
