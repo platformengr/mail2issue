@@ -28,7 +28,7 @@ async function run() {
 
 
   } catch (error ) {
-    core.setFailed(JSON.stringify(error,
+    core.error(JSON.stringify(error,
       Object.getOwnPropertyNames(error)
     ));
   }
