@@ -9,9 +9,9 @@ import Mail2Issue from './Mail2Issue';
 
 
 async function run() {
-    const task = core.getInput('task') || 'sync';
+    const task = core.getInput('task');
     if (!task) throw new Error('Task is required');
-    const token = core.getInput('token') ||  "vgv"
+    const token = core.getInput('token') 
     if (!token) throw new Error('GITHUB_TOKEN is required');
     core.info('Token is valid');
 
