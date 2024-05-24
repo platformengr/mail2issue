@@ -1,0 +1,14 @@
+name: "Mail@Issue"
+description: "Connect GitHub issues to Mailbox for free and easy Helpdesk issue tracking" 
+inputs:
+  mail-config:
+    description: "json config for mailbox (see docs)"
+    required: true
+  task:
+    description: "task > sync | comment | test"
+    required: true
+  
+
+runs:
+  using: "node20"
+  main: ./dist/index.mjs

@@ -4,7 +4,7 @@ import StateProvider from "./StateProvider"
 
 const NUMBER_OF_EMAILS = 30;
 const DAYS_BACK = 1;
-class GithubTacker {
+export default class Mail2Issue {
   private mailbox: MailProvider;
   private github;
   private state;

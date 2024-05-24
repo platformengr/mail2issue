@@ -2,6 +2,21 @@ import Imap from "imap";
 import { simpleParser, Headers } from "mailparser";
 import nodemailer from "nodemailer";
 
+export interface MailProviderOptions {
+  emailAddress: string,
+  password: string,
+  imap: { host: string; port: number | undefined; tls: boolean | undefined },
+  smtp:
+    | {
+        host: string | undefined;
+        port: number | undefined;
+        inSecure: boolean | undefined;
+        auth:
+          | { user: string | undefined; pass: string | undefined }
+          | undefined;
+      }
+    | undefined,
+}
 
 export default class MailProvider {
   private readonly emailAddress: string;
@@ -9,39 +24,27 @@ export default class MailProvider {
   private readonly imap: Imap;
   private readonly transporter: nodemailer.Transporter;
 
-  constructor(
-    emailAddress: string,
-    password: string,
-    imap: { host: string; port: number | undefined; tls: boolean | undefined },
-    smtp:
-      | {
-          host: string | undefined;
-          port: number | undefined;
-          inSecure: boolean | undefined;
-          auth:
-            | { user: string | undefined; pass: string | undefined }
-            | undefined;
-        }
-      | undefined,
-  ) {
-    this.emailAddress = emailAddress;
-    this.password = password;
+
+
+  constructor( config: MailProviderOptions) {
+    this.emailAddress = config.emailAddress;
+    this.password = config.password;
 
     this.imap = new Imap({
       user: this.emailAddress,
       password: this.password,
-      host: imap.host,
-      port: imap.port ?? 993,
-      tls: imap.tls ?? true,
+      host: config.imap.host,
+      port: config.imap.port ?? 993,
+      tls: config.imap.tls ?? true,
     });
 
     this.transporter = nodemailer.createTransport({
-      host: smtp?.host ?? imap.host,
-      port: smtp?.port ?? smtp?.inSecure ? 21 : 465,
-      secure: smtp?.inSecure ?? true,
+      host: config.smtp?.host ?? config.imap.host,
+      port: config.smtp?.port ?? config.smtp?.inSecure ? 21 : 465,
+      secure: config.smtp?.inSecure ?? true,
       auth: {
-        user: smtp?.auth?.user ?? emailAddress,
-        pass: smtp?.auth?.pass ?? password,
+        user: config.smtp?.auth?.user ?? config.emailAddress,
+        pass: config.smtp?.auth?.pass ?? config.password,
       },
     });
   }
