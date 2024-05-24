@@ -27,8 +27,10 @@ async function run() {
     else throw new Error('Invalid task');
 
 
-  } catch (error) {
-    core.setFailed(JSON.stringify(error));
+  } catch (error ) {
+    core.setFailed(JSON.stringify(error,
+      Object.getOwnPropertyNames(error)
+    ));
   }
 }
 
