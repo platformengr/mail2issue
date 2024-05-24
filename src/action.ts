@@ -2,6 +2,7 @@
 
 
 import core from '@actions/core';
+import * as github from '@actions/github';
 
 import StateProvider from './StateProvider';
 import IssueProvider from './IssueProvider';
@@ -10,9 +11,9 @@ import Mail2Issue from './Mail2Issue';
 
 
 async function run() {
-    const task = core.getInput('task');
+    const task = core.getInput('task') || 'sync';
     if (!task) throw new Error('Task is required');
-    const token = core.getInput('token');
+    const token = core.getInput('token') ||  "vgv"
     if (!token) throw new Error('GITHUB_TOKEN is required');
     core.info('Token is valid');
 
