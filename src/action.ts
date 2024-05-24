@@ -14,6 +14,8 @@ async function run() {
 
     const token = core.getInput('token');
     if (!token) throw new Error('GITHUB_TOKEN is required');
+    core.info('Token is valid');
+
     const mailConfig = JSON.parse(core.getInput('mail-config')) as MailProviderOptions;
     const task = core.getInput('task');
 
