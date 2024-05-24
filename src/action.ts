@@ -1,7 +1,6 @@
 
 
 import * as core from '@actions/core'
-import * as github from '@actions/github';
 
 import StateProvider from './StateProvider';
 import IssueProvider from './IssueProvider';
