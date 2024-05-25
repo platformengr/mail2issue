@@ -57,7 +57,7 @@ export default class StateProvider {
     try {
       await this.updateVariables(name, value);
     } catch (error: any) {
-      if (error?.status === 400) await this.setVariables(name, value);
+      if (error?.status === 404) await this.setVariables(name, value);
       else throw error;
     }
   }
