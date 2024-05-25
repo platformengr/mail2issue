@@ -1,11 +1,17 @@
 import * as core from "@actions/core";
-
 import StateProvider from "./StateProvider";
 import IssueProvider from "./IssueProvider";
 import MailProvider, { MailProviderOptions } from "./MailProvider";
 import Mail2Issue from "./Mail2Issue";
-import { info } from "console";
 
+
+
+/**
+ * Runs the main logic of the action.
+ * Retrieves the task and token inputs, initializes the necessary providers,
+ * and performs the corresponding action based on the task.
+ * @throws {Error} If the task or token inputs are missing, or if the task is invalid.
+ */
 async function run() {
   const task = core.getInput("task");
   if (!task) throw new Error("Task is required");
@@ -32,6 +38,14 @@ if (process.env.NODE_ENV !== "test") {
   void run();
 }
 
+
+
+/**
+ * Tests the mail connection by sending a test email and verifying its receipt.
+ * @param mailProvider - The mail provider object used to send and fetch emails.
+ * @param emailAddress - The email address to send the test email to.
+ * @throws {Error} If no emails are found after sending the test email.
+ */
 async function testMailConnection(
   mailProvider: MailProvider,
   emailAddress: string,

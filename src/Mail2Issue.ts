@@ -65,6 +65,11 @@ export default class Mail2Issue {
     else this.handleNewTicket(mail);
   }
 
+  /**
+   * Synchronizes incoming emails.
+   * 
+   * @returns A promise that resolves to void.
+   */
   public async syncIncoming(): Promise<void> {
     const lastSynced = await this.state.lastSynced.get();
     const incoming = lastSynced
