@@ -73,16 +73,18 @@ export default class Mail2Issue {
    * @returns A promise that resolves to void.
    */
   public  syncIncoming = async () => {
-    console.log("syncIncoming");
+
     const lastUid = await this.state.lastUidSynced.get();
     const incoming = lastUid
       ? await this.getIncomingByUid(lastUid)
       : await this.getIncomingByDays(DAYS_BACK);
-    console.log("set value");
+
+    if (incoming.length === 0) return;
+
     await this.state.lastSynced.set(new Date().toISOString());
     const sorted = incoming.sort((a, b) => a.uid - b.uid);
     await this.state.lastUidSynced.set(sorted.slice(-1)[0].uid.toString());
-    console.log("handle incoming");
+
     const promise = sorted.map(this.handleIncoming);
     await Promise.all(promise);
   }
