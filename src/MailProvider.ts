@@ -10,7 +10,6 @@ export interface MailProviderOptions {
     | {
         host: string | undefined;
         port: number | undefined;
-        inSecure: boolean | undefined;
         auth:
           | { user: string | undefined; pass: string | undefined }
           | undefined;
@@ -40,8 +39,8 @@ export default class MailProvider {
 
     this.transporter = nodemailer.createTransport({
       host: config.smtp?.host ?? config.imap.host,
-      port: config.smtp?.port ?? config.smtp?.inSecure ? 25 : 587,
-      secure: config.smtp?.inSecure ?? true,
+      port: config.smtp?.port ??  587,
+      secure: config.smtp?.port === 465 ? true :  false, // https://nodemailer.com/about/
       auth: {
         user: config.smtp?.auth?.user ?? config.emailAddress,
         pass: config.smtp?.auth?.pass ?? config.password,
