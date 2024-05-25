@@ -3,9 +3,9 @@ import { simpleParser, Headers } from "mailparser";
 import nodemailer from "nodemailer";
 
 export interface MailProviderOptions {
-  emailAddress: string,
-  password: string,
-  imap: { host: string; port: number | undefined; tls: boolean | undefined },
+  emailAddress: string;
+  password: string;
+  imap: { host: string; port: number | undefined; tls: boolean | undefined };
   smtp:
     | {
         host: string | undefined;
@@ -14,7 +14,7 @@ export interface MailProviderOptions {
           | { user: string | undefined; pass: string | undefined }
           | undefined;
       }
-    | undefined,
+    | undefined;
 }
 
 export default class MailProvider {
@@ -23,9 +23,7 @@ export default class MailProvider {
   private readonly imap: Imap;
   private readonly transporter: nodemailer.Transporter;
 
-
-
-  constructor( config: MailProviderOptions) {
+  constructor(config: MailProviderOptions) {
     this.emailAddress = config.emailAddress;
     this.password = config.password;
 
@@ -39,8 +37,8 @@ export default class MailProvider {
 
     this.transporter = nodemailer.createTransport({
       host: config.smtp?.host ?? config.imap.host,
-      port: config.smtp?.port ??  587,
-      secure: config.smtp?.port === 465 ? true :  false, // https://nodemailer.com/about/
+      port: config.smtp?.port ?? 587,
+      secure: config.smtp?.port === 465 ? true : false, // https://nodemailer.com/about/
       auth: {
         user: config.smtp?.auth?.user ?? config.emailAddress,
         pass: config.smtp?.auth?.pass ?? config.password,
@@ -115,7 +113,6 @@ export default class MailProvider {
             if (err) reject(err);
 
             const selected = results.slice(-limit);
-            console.log("results", selected);
 
             const fetchResults = this.imap.fetch(selected, {
               bodies: "",

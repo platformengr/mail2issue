@@ -1,6 +1,6 @@
 import MailProvider, { FetchedEmail } from "./MailProvider";
 import IssueProvider from "./IssueProvider";
-import StateProvider from "./StateProvider"
+import StateProvider from "./StateProvider";
 
 const NUMBER_OF_EMAILS = 30;
 const DAYS_BACK = 1;
@@ -46,7 +46,6 @@ export default class Mail2Issue {
         messageId: mail.messageId,
         type: "original",
       },
-    
     });
   }
 
@@ -68,10 +67,10 @@ export default class Mail2Issue {
 
   public async syncIncoming(): Promise<void> {
     const lastSynced = await this.state.lastSynced.get();
-    const incoming = (lastSynced) ?
-      await this.getIncomingByUid(lastSynced)
+    const incoming = lastSynced
+      ? await this.getIncomingByUid(lastSynced)
       : await this.getIncomingByDays(DAYS_BACK);
 
-    incoming.forEach(this.handleIncoming);
+    incoming.sort((a, b) => a.uid - b.uid).forEach(this.handleIncoming);
   }
 }

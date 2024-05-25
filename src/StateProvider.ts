@@ -12,7 +12,6 @@ export default class StateProvider {
     };
   }
 
-
   private async setVariables(name: string, value: string) {
     return await this.octokit.request(
       "POST /repos/{owner}/{repo}/actions/variables",
@@ -34,6 +33,19 @@ export default class StateProvider {
         ...this.base,
         name,
         value,
+        headers: {
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+    );
+  }
+
+  private async deleteVariables(name: string) {
+    return await this.octokit.request(
+      "DELETE /repos/{owner}/{repo}/actions/variables/{name}",
+      {
+        ...this.base,
+        name,
         headers: {
           "X-GitHub-Api-Version": "2022-11-28",
         },
@@ -70,10 +82,15 @@ export default class StateProvider {
     }
   }
 
-public lastSynced = {
+  public lastSynced = {
     get: async () => await this.getVariables("lastSynced"),
-    set: async (value: string) => await this.setOrUpdateVariables("lastSynced", value),
-}
-
-
+    set: async (value: string) =>
+      await this.setOrUpdateVariables("lastSynced", value),
+  };
+  public testDb = {
+    get: async () => await this.getVariables("testDb"),
+    set: async (value: string) =>
+      await this.setOrUpdateVariables("testDb", value),
+    delete: async () => await this.deleteVariables("testDb"),
+  };
 }

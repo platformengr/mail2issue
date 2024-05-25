@@ -3,7 +3,6 @@ import * as github from "@actions/github";
 type MessageTypes = "original" | "reply";
 
 interface createIssue {
-
   title: string;
   body: string;
   meta: {
@@ -14,7 +13,7 @@ interface createIssue {
     toReceivers: { address: string; name: string }[];
     ccReceivers: { address: string; name: string }[] | undefined;
     replyTo: string | undefined;
-  }
+  };
 }
 
 export default class IssueProvider {
@@ -29,9 +28,6 @@ export default class IssueProvider {
     };
   }
 
-
-
-
   /**
    * Creates a new issue with the specified title, body, and meta data.
    * @param {createIssue} options - The options for creating the issue.
@@ -41,11 +37,10 @@ export default class IssueProvider {
    * @returns {Promise<any>} - A promise that resolves to the newly created issue.
    */
   async createIssue({ title, body, meta }: createIssue) {
-
     const newIssue = await this.octokit.rest.issues.create({
       ...this.base,
       title,
-      body: ("<!--" + JSON.stringify(meta) + "-->\n" + body),
+      body: "<!--" + JSON.stringify(meta) + "-->\n" + body,
     });
     return newIssue;
   }
@@ -58,7 +53,7 @@ export default class IssueProvider {
     return issue;
   }
 
-  async commentIssue(id: number, body: string,) {
+  async commentIssue(id: number, body: string) {
     const newComment = await this.octokit.rest.issues.createComment({
       ...this.base,
       issue_number: id,
@@ -66,5 +61,4 @@ export default class IssueProvider {
     });
     return newComment;
   }
-  
 }

@@ -1,5 +1,5 @@
 name: "Mail@Issue"
-description: "Connect GitHub issues to Mailbox for free and easy Helpdesk issue tracking" 
+description: "Connect GitHub issues to Mailbox for free and easy Helpdesk issue tracking"
 inputs:
   mail-config:
     description: "json config for mailbox (see docs)"
@@ -20,8 +20,7 @@ inputs:
 
       [Learn more about creating and using encrypted secrets](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/creating-and-using-encrypted-secrets)
     default: ${{ github.token }}
-  
 
 runs:
   using: "node20"
-  main: ./dist/index.js 
+  main: ./dist/index.js

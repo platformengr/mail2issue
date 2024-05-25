@@ -1,4 +1,3 @@
-
 # Mail2Issues
 
 This is a GitHub action that creates issues from emails.
@@ -13,11 +12,11 @@ steps:
     uses: platformengr/mail2issue
     with:
       mail-config: '{
-        "emailAddress": "your-email@example.com", 
-        "password": "${{ secrets.MAIL_PASSWORD }}", 
+        "emailAddress": "your-email@example.com",
+        "password": "${{ secrets.MAIL_PASSWORD }}",
         "imap": {"host": "imap.example.com"}
         }'
-      task: 'sync'
+      task: "sync"
 ```
 
 ## Inputs
@@ -49,6 +48,8 @@ If you want to contribute to this project, please open an issue or a pull reques
 ## License
 
 This project is licensed under the ISC license.
+
 ```
 
 Please replace the placeholders with the actual details of your project.
+```
