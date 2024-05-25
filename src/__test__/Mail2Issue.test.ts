@@ -5,7 +5,6 @@ import Mail2Issue from '../Mail2Issue'
 import MailProvider , {FetchedEmail} from '../MailProvider'
 import IssueProvider from '../IssueProvider'
 import StateProvider from '../StateProvider'
-import { Mock } from 'node:test'
 
 jest.mock('../MailProvider', jest.fn().mockImplementation(() => ({
    __esModule: true, //When module has multiple exports
