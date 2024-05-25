@@ -5,17 +5,19 @@ import StateProvider from "./StateProvider";
 const NUMBER_OF_EMAILS = 30;
 const DAYS_BACK = 1;
 export default class Mail2Issue {
-  private mailbox: MailProvider;
-  private github;
-  private state;
+  private readonly mailbox: MailProvider;
+  private readonly github;
+  private readonly state;
+
 
   constructor(mail: MailProvider, issue: IssueProvider, state: StateProvider) {
     this.mailbox = mail;
     this.github = issue;
     this.state = state;
+
   }
 
-  private async getIncomingByUid(lastSynced: string) {
+  private  getIncomingByUid= async(lastSynced: string) => {
     if (isNaN(parseInt(lastSynced)))
       throw new Error("Invalid lastSynced value");
     return await this.mailbox.fetchEmailsByUID(
@@ -25,16 +27,16 @@ export default class Mail2Issue {
     );
   }
 
-  private async getIncomingByDays(daysBack: number) {
+  private  getIncomingByDays = async (daysBack: number) => {
     const date = new Date();
     date.setDate(date.getDate() - daysBack);
     return await this.mailbox.fetchEmailsByDate(date, NUMBER_OF_EMAILS);
   }
 
-  private handleNewTicket(mail: FetchedEmail) {
+  private  handleNewTicket= async (mail: FetchedEmail) => {
     const title = mail.subject;
     const body = mail.body;
-    this.github.createIssue({
+    return await this.github.createIssue({
       title,
       body,
       meta: {
@@ -49,20 +51,20 @@ export default class Mail2Issue {
     });
   }
 
-  private handleReplay(mail: FetchedEmail, regex: RegExp) {
+  private  handleReplay = async (mail: FetchedEmail, regex: RegExp) => {
     const match = mail.subject?.match(regex);
     if (!match)
       throw new Error("could not find issue id in subject :" + mail.subject);
     const issueId = parseInt(match[0].slice(2, -1));
     const body = mail.body;
-    this.github.commentIssue(issueId, body);
+    await this.github.commentIssue(issueId, body);
   }
 
-  private handleIncoming(mail: FetchedEmail): void {
+  private  handleIncoming= async (mail: FetchedEmail)  => {
     const regex = /\[:\d+\]/;
     const isReplay = regex.test(mail.subject);
-    if (isReplay) this.handleReplay(mail, regex);
-    else this.handleNewTicket(mail);
+    if (isReplay) await this.handleReplay(mail, regex);
+    else await this.handleNewTicket(mail);
   }
 
   /**
@@ -70,12 +72,16 @@ export default class Mail2Issue {
    * 
    * @returns A promise that resolves to void.
    */
-  public async syncIncoming(): Promise<void> {
-    const lastSynced = await this.state.lastSynced.get();
-    const incoming = lastSynced
-      ? await this.getIncomingByUid(lastSynced)
+  public  syncIncoming = async () => {
+    const lastUid = await this.state.lastUidSynced.get();
+    const incoming = lastUid
+      ? await this.getIncomingByUid(lastUid)
       : await this.getIncomingByDays(DAYS_BACK);
+    
+    await this.state.lastSynced.set(new Date().toISOString());
+    const sorted = incoming.sort((a, b) => a.uid - b.uid);
+    await this.state.lastUidSynced.set(sorted.slice(-1)[0].uid.toString());
 
-    incoming.sort((a, b) => a.uid - b.uid).forEach(this.handleIncoming);
+    sorted.forEach(this.handleIncoming);
   }
 }

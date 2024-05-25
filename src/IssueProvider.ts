@@ -8,11 +8,11 @@ interface createIssue {
   meta: {
     uid: number;
     type: MessageTypes;
-    messageId: string | undefined;
+    messageId?: string ;
     from: { address: string; name: string }[];
     toReceivers: { address: string; name: string }[];
-    ccReceivers: { address: string; name: string }[] | undefined;
-    replyTo: string | undefined;
+    ccReceivers?: { address: string; name: string }[] ;
+    replyTo?: string;
   };
 }
 

@@ -1,0 +1,68 @@
+[
+    {
+        "body": "Body of the message 1",
+        "meta": {
+            "from": [
+                {
+                    "address": "sender1@example.com",
+                    "name": "Sender One"
+                }
+            ],
+            "messageId": "message1",
+            "replyTo": "replyto1@example.com",
+            "toReceivers": [
+                {
+                    "address": "receiver1@example.com",
+                    "name": "Receiver One"
+                }
+            ],
+            "type": "original",
+            "uid": 20001
+        },
+        "title": "Subject 1"
+    },
+    {
+        "body": "Body of the message 2",
+        "meta": {
+            "from": [
+                {
+                    "address": "sender2@example.com",
+                    "name": "Sender Two"
+                }
+            ],
+            "messageId": "message2",
+            "replyTo": "replyto2@example.com",
+            "toReceivers": [
+                {
+                    "address": "receiver2@example.com",
+                    "name": "Receiver Two"
+                }
+            ],
+            "type": "original",
+            "uid": 20002
+        },
+        "title": "Subject 2"
+    },
+    {
+        "body": "Body of the message 3",
+        "meta": {
+            "from": [
+                {
+                    "address": "sender3@example.com",
+                    "name": "Sender Three"
+                }
+            ],
+            "messageId": "message3",
+            "replyTo": "replyto3@example.com",
+            "toReceivers": [
+                {
+                    "address": "receiver3@example.com",
+                    "name": "Receiver Three"
+                }
+            ],
+            "type": "original",
+            "uid": 20003
+        },
+        "title": "Subject 3"
+    }
+]

@@ -87,10 +87,9 @@ export default class StateProvider {
     set: async (value: string) =>
       await this.setOrUpdateVariables("lastSynced", value),
   };
-  public testDb = {
-    get: async () => await this.getVariables("testDb"),
+  public lastUidSynced = {
+    get: async () => await this.getVariables("lastUidSynced"),
     set: async (value: string) =>
-      await this.setOrUpdateVariables("testDb", value),
-    delete: async () => await this.deleteVariables("testDb"),
+      await this.setOrUpdateVariables("lastUidSynced", value),
   };
 }

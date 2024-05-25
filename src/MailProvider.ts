@@ -5,38 +5,38 @@ import nodemailer from "nodemailer";
 export interface MailProviderOptions {
   emailAddress: string;
   password: string;
-  imap: { host: string; port: number | undefined; tls: boolean | undefined };
-  smtp:
-    | {
-        host: string | undefined;
-        port: number | undefined;
-        auth:
-          | { user: string | undefined; pass: string | undefined }
-          | undefined;
+  host: string; 
+  imap?: {port?: number ; tls?: boolean } ;
+  smtp?: {
+        host?: string ;
+        port?: number ;
+        auth?: { user?: string ; pass?: string }
       }
-    | undefined;
 }
 
 export default class MailProvider {
   private readonly emailAddress: string;
   private readonly password: string;
+  private readonly host: string;
   private readonly imap: Imap;
   private readonly transporter: nodemailer.Transporter;
 
   constructor(config: MailProviderOptions) {
     this.emailAddress = config.emailAddress;
     this.password = config.password;
+    this.host= config.host;
 
     this.imap = new Imap({
       user: this.emailAddress,
       password: this.password,
-      host: config.imap.host,
-      port: config.imap.port ?? 993,
-      tls: config.imap.tls ?? true,
+      host: config.host,
+     
+      port: config.imap?.port ?? 993,
+      tls: config.imap?.tls ?? true,
     });
 
     this.transporter = nodemailer.createTransport({
-      host: config.smtp?.host ?? config.imap.host,
+      host: config.smtp?.host ?? config.host,
       port: config.smtp?.port ?? 587,
       secure: config.smtp?.port === 465 ? true : false, // https://nodemailer.com/about/
       auth: {
@@ -201,12 +201,12 @@ interface EmailData {
 export interface FetchedEmail {
   uid: number;
   senders: { address: string; name: string }[];
-  messageId: string | undefined;
+  messageId?: string ;
   toReivers: { address: string; name: string }[];
-  ccReivers: { address: string; name: string }[] | undefined;
+  ccReivers?: { address: string; name: string }[] ;
   subject: string;
   body: string;
   date: Date;
-  replyTo: string | undefined;
-  attachments: any[];
+  replyTo?: string ;
+  attachments?: any[];
 }
