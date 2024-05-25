@@ -40,7 +40,7 @@ export default class MailProvider {
 
     this.transporter = nodemailer.createTransport({
       host: config.smtp?.host ?? config.imap.host,
-      port: config.smtp?.port ?? config.smtp?.inSecure ? 21 : 465,
+      port: config.smtp?.port ?? config.smtp?.inSecure ? 25 : 587,
       secure: config.smtp?.inSecure ?? true,
       auth: {
         user: config.smtp?.auth?.user ?? config.emailAddress,
