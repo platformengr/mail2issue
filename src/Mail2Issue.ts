@@ -9,15 +9,13 @@ export default class Mail2Issue {
   private readonly github;
   private readonly state;
 
-
   constructor(mail: MailProvider, issue: IssueProvider, state: StateProvider) {
     this.mailbox = mail;
     this.github = issue;
     this.state = state;
-
   }
 
-  private  getIncomingByUid= async(lastSynced: string) => {
+  private getIncomingByUid = async (lastSynced: string) => {
     if (isNaN(parseInt(lastSynced)))
       throw new Error("Invalid lastSynced value");
     return await this.mailbox.fetchEmailsByUID(
@@ -25,15 +23,15 @@ export default class Mail2Issue {
       "*",
       NUMBER_OF_EMAILS,
     );
-  }
+  };
 
-  private  getIncomingByDays = async (daysBack: number) => {
+  private getIncomingByDays = async (daysBack: number) => {
     const date = new Date();
     date.setDate(date.getDate() - daysBack);
     return await this.mailbox.fetchEmailsByDate(date, NUMBER_OF_EMAILS);
-  }
+  };
 
-  private  handleNewTicket= async (mail: FetchedEmail) => {
+  private handleNewTicket = async (mail: FetchedEmail) => {
     const title = mail.subject;
     const body = mail.body;
     return await this.github.createIssue({
@@ -49,31 +47,30 @@ export default class Mail2Issue {
         type: "original",
       },
     });
-  }
+  };
 
-  private  handleReplay = async (mail: FetchedEmail, regex: RegExp) => {
+  private handleReplay = async (mail: FetchedEmail, regex: RegExp) => {
     const match = mail.subject?.match(regex);
     if (!match)
       throw new Error("could not find issue id in subject :" + mail.subject);
     const issueId = parseInt(match[0].slice(2, -1));
     const body = mail.body;
     await this.github.commentIssue(issueId, body);
-  }
+  };
 
-  private  handleIncoming= async (mail: FetchedEmail)  => {
+  private handleIncoming = async (mail: FetchedEmail) => {
     const regex = /\[:\d+\]/;
     const isReplay = regex.test(mail.subject);
     if (isReplay) await this.handleReplay(mail, regex);
     else await this.handleNewTicket(mail);
-  }
+  };
 
   /**
    * Synchronizes incoming emails.
-   * 
+   *
    * @returns A promise that resolves to void.
    */
-  public  syncIncoming = async () => {
-
+  public syncIncoming = async () => {
     const lastUid = await this.state.lastUidSynced.get();
     const incoming = lastUid
       ? await this.getIncomingByUid(lastUid)
@@ -87,5 +84,5 @@ export default class Mail2Issue {
 
     const promise = sorted.map(this.handleIncoming);
     await Promise.all(promise);
-  }
+  };
 }

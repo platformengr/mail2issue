@@ -4,8 +4,6 @@ import IssueProvider from "./IssueProvider";
 import MailProvider, { MailProviderOptions } from "./MailProvider";
 import Mail2Issue from "./Mail2Issue";
 
-
-
 /**
  * Runs the main logic of the action.
  * Retrieves the task and token inputs, initializes the necessary providers,
@@ -37,8 +35,6 @@ async function run() {
 if (process.env.NODE_ENV !== "test") {
   void run();
 }
-
-
 
 /**
  * Tests the mail connection by sending a test email and verifying its receipt.

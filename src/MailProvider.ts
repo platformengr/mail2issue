@@ -5,13 +5,13 @@ import nodemailer from "nodemailer";
 export interface MailProviderOptions {
   emailAddress: string;
   password: string;
-  host: string; 
-  imap?: {port?: number ; tls?: boolean } ;
+  host: string;
+  imap?: { port?: number; tls?: boolean };
   smtp?: {
-        host?: string ;
-        port?: number ;
-        auth?: { user?: string ; pass?: string }
-      }
+    host?: string;
+    port?: number;
+    auth?: { user?: string; pass?: string };
+  };
 }
 
 export default class MailProvider {
@@ -24,13 +24,13 @@ export default class MailProvider {
   constructor(config: MailProviderOptions) {
     this.emailAddress = config.emailAddress;
     this.password = config.password;
-    this.host= config.host;
+    this.host = config.host;
 
     this.imap = new Imap({
       user: this.emailAddress,
       password: this.password,
       host: config.host,
-     
+
       port: config.imap?.port ?? 993,
       tls: config.imap?.tls ?? true,
     });
@@ -118,7 +118,10 @@ export default class MailProvider {
               bodies: "",
               struct: true,
             });
-            const emails: EmailData[] = [];
+            const emailDataPromises: Promise<{
+              buffer: string;
+              uid: number;
+            }>[] = [];
 
             fetchResults.on("message", (msg, seq) => {
               const uidPromise = new Promise((resolve) => {
@@ -127,25 +130,19 @@ export default class MailProvider {
                 });
               });
 
-              const parts: Buffer[] = [];
+              let buffer = "";
               msg.on("body", (stream) => {
                 stream.on("data", (chunk) => {
-                  parts.push(chunk);
+                  buffer += chunk.toString("utf8");
                 });
 
                 stream.once("end", async () => {
-                  const uid = (await uidPromise) as number;
-                  const buffer = Buffer.concat(parts);
-                  simpleParser(buffer, (err, parsed) => {
-                    if (err) reject(err);
-                    emails.push({
-                      uid,
-                      headers: parsed.headers,
-                      body: parsed.text ?? "",
-                      date: parsed.date ?? new Date(),
-                      attachments: [],
-                    });
-                  });
+                  emailDataPromises.push(
+                    new Promise(async (resolve) => {
+                      const uid = (await uidPromise) as number;
+                      resolve({ buffer, uid });
+                    }),
+                  );
                 });
               });
             });
@@ -155,29 +152,38 @@ export default class MailProvider {
               reject(err);
             });
 
-            fetchResults.once("end", () => {
+            fetchResults.once("end", async () => {
               this.imap.end();
-              const fetchEmails = emails.map((email) => ({
-                uid: email.uid,
-                senders: (email.headers.get("from") as any).value as {
-                  address: string;
-                  name: string;
-                }[],
-                messageId: email.headers.get("message-id")?.toString(),
-                references: email.headers.get("references"),
-                toReivers: (email.headers.get("from") as any).value as {
-                  address: string;
-                  name: string;
-                }[],
-                ccReivers: (email.headers.get("cc") as any)?.value as
-                  | { address: string; name: string }[]
-                  | undefined,
-                replyTo: email.headers.get("reply-to"),
-                subject: email.headers.get("subject"),
-                date: email.headers.get("date"),
-                body: email.body,
-                attachments: email.attachments,
+              const emailsData = await Promise.all(emailDataPromises);
+
+              const promises = emailsData.map(async ({ buffer, uid }) => ({
+                parsed: await simpleParser(buffer),
+                uid,
               }));
+              const parsedEmails = await Promise.all(promises);
+              const fetchEmails = parsedEmails.map(
+                ({ parsed: email, uid }) => ({
+                  uid,
+                  senders: (email.headers.get("from") as any).value as {
+                    address: string;
+                    name: string;
+                  }[],
+                  messageId: email.headers.get("message-id")?.toString(),
+                  references: email.headers.get("references"),
+                  toReivers: (email.headers.get("from") as any).value as {
+                    address: string;
+                    name: string;
+                  }[],
+                  ccReivers: (email.headers.get("cc") as any)?.value as
+                    | { address: string; name: string }[]
+                    | undefined,
+                  replyTo: email.headers.get("reply-to"),
+                  subject: email.headers.get("subject"),
+                  date: email.headers.get("date"),
+                  body: email.html ?? email.text ?? "",
+                  attachments: email.attachments,
+                }),
+              );
               resolve(fetchEmails as FetchedEmail[]);
             });
           });
@@ -201,12 +207,12 @@ interface EmailData {
 export interface FetchedEmail {
   uid: number;
   senders: { address: string; name: string }[];
-  messageId?: string ;
+  messageId?: string;
   toReivers: { address: string; name: string }[];
-  ccReivers?: { address: string; name: string }[] ;
+  ccReivers?: { address: string; name: string }[];
   subject: string;
   body: string;
   date: Date;
-  replyTo?: string ;
+  replyTo?: string;
   attachments?: any[];
 }

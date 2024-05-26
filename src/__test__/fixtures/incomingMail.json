@@ -1,65 +1,65 @@
 [
   {
-      "uid": 20001,
-      "senders": [
-          {
-              "address": "sender1@example.com",
-              "name": "Sender One"
-          }
-      ],
-      "messageId": "message1",
-      "toReivers": [
-          {
-              "address": "receiver1@example.com",
-              "name": "Receiver One"
-          }
-      ],
-      "subject": "Subject 1",
-      "body": "Body of the message 1",
-      "date": "2022-01-01T00:00:00.000Z",
-      "replyTo": "replyto1@example.com",
-      "attachments": []
+    "uid": 20001,
+    "senders": [
+      {
+        "address": "sender1@example.com",
+        "name": "Sender One"
+      }
+    ],
+    "messageId": "message1",
+    "toReivers": [
+      {
+        "address": "receiver1@example.com",
+        "name": "Receiver One"
+      }
+    ],
+    "subject": "Subject 1",
+    "body": "Body of the message 1",
+    "date": "2022-01-01T00:00:00.000Z",
+    "replyTo": "replyto1@example.com",
+    "attachments": []
   },
   {
-      "uid": 20002,
-      "senders": [
-          {
-              "address": "sender2@example.com",
-              "name": "Sender Two"
-          }
-      ],
-      "messageId": "message2",
-      "toReivers": [
-          {
-              "address": "receiver2@example.com",
-              "name": "Receiver Two"
-          }
-      ],
-      "subject": "Subject 2",
-      "body": "Body of the message 2",
-      "date": "2022-02-01T00:00:00.000Z",
-      "replyTo": "replyto2@example.com",
-      "attachments": []
+    "uid": 20002,
+    "senders": [
+      {
+        "address": "sender2@example.com",
+        "name": "Sender Two"
+      }
+    ],
+    "messageId": "message2",
+    "toReivers": [
+      {
+        "address": "receiver2@example.com",
+        "name": "Receiver Two"
+      }
+    ],
+    "subject": "Subject 2",
+    "body": "Body of the message 2",
+    "date": "2022-02-01T00:00:00.000Z",
+    "replyTo": "replyto2@example.com",
+    "attachments": []
   },
   {
-      "uid": 20003,
-      "senders": [
-          {
-              "address": "sender3@example.com",
-              "name": "Sender Three"
-          }
-      ],
-      "messageId": "message3",
-      "toReivers": [
-          {
-              "address": "receiver3@example.com",
-              "name": "Receiver Three"
-          }
-      ],
-      "subject": "Subject 3",
-      "body": "Body of the message 3",
-      "date": "2022-03-01T00:00:00.000Z",
-      "replyTo": "replyto3@example.com",
-      "attachments": []
+    "uid": 20003,
+    "senders": [
+      {
+        "address": "sender3@example.com",
+        "name": "Sender Three"
+      }
+    ],
+    "messageId": "message3",
+    "toReivers": [
+      {
+        "address": "receiver3@example.com",
+        "name": "Receiver Three"
+      }
+    ],
+    "subject": "Subject 3",
+    "body": "Body of the message 3",
+    "date": "2022-03-01T00:00:00.000Z",
+    "replyTo": "replyto3@example.com",
+    "attachments": []
   }
 ]
