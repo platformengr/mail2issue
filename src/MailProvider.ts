@@ -179,13 +179,15 @@ export default class MailProvider {
                     | { address: string; name: string }[]
                     | undefined,
                   replyTo: (email.headers.get("reply-to") as any)?.value as
-                  | { address: string; name: string }[]
-                  | undefined,
+                    | { address: string; name: string }[]
+                    | undefined,
                   subject: email.headers.get("subject"),
                   date: email.headers.get("date"),
                   text: email.text,
-                  body:  email.html || email.text,
-                  VisibleText: new EmailReplyParser().read(( email.text) ?? "").getVisibleText(),
+                  body: email.html || email.text,
+                  VisibleText: new EmailReplyParser()
+                    .read(email.text ?? "")
+                    .getVisibleText(),
                   attachments: email.attachments,
                 }),
               );
@@ -222,7 +224,7 @@ export interface FetchedEmail {
   subject: string;
   body?: string;
   text?: string;
-  VisibleText?: any; 
+  VisibleText?: any;
   date: Date;
   attachments?: any[];
 }
