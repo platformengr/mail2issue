@@ -33,7 +33,7 @@ export default class Mail2Issue {
 
   private handleNewTicket = async (mail: FetchedEmail) => {
     const title = mail.subject;
-    const body = mail.body;
+    const body = mail.VisibleText;
     return await this.github.createIssue({
       title,
       body,
@@ -54,7 +54,7 @@ export default class Mail2Issue {
     if (!match)
       throw new Error("could not find issue id in subject :" + mail.subject);
     const issueId = parseInt(match[0].slice(2, -1));
-    const body = mail.body;
+    const body = mail.VisibleText;
     await this.github.commentIssue(issueId, body);
   };
 

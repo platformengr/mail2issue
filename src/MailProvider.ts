@@ -1,6 +1,7 @@
 import Imap from "imap";
 import { simpleParser, Headers } from "mailparser";
 import nodemailer from "nodemailer";
+import EmailReplyParser from "email-reply-parser";
 
 export interface MailProviderOptions {
   emailAddress: string;
@@ -177,10 +178,14 @@ export default class MailProvider {
                   ccReivers: (email.headers.get("cc") as any)?.value as
                     | { address: string; name: string }[]
                     | undefined,
-                  replyTo: email.headers.get("reply-to"),
+                  replyTo: (email.headers.get("reply-to") as any)?.value as
+                  | { address: string; name: string }[]
+                  | undefined,
                   subject: email.headers.get("subject"),
                   date: email.headers.get("date"),
-                  body: email.html ?? email.text ?? "",
+                  text: email.text,
+                  body:  email.html || email.text,
+                  VisibleText: new EmailReplyParser().read(( email.text) ?? "").getVisibleText(),
                   attachments: email.attachments,
                 }),
               );
@@ -204,15 +209,20 @@ interface EmailData {
   attachments: any[];
 }
 
+/**
+ * Represents a fetched email.
+ */
 export interface FetchedEmail {
   uid: number;
   senders: { address: string; name: string }[];
   messageId?: string;
   toReivers: { address: string; name: string }[];
   ccReivers?: { address: string; name: string }[];
+  replyTo?: { address: string; name: string }[];
   subject: string;
-  body: string;
+  body?: string;
+  text?: string;
+  VisibleText?: any; 
   date: Date;
-  replyTo?: string;
   attachments?: any[];
 }

@@ -12,7 +12,7 @@ interface createIssue {
     from: { address: string; name: string }[];
     toReceivers: { address: string; name: string }[];
     ccReceivers?: { address: string; name: string }[];
-    replyTo?: string;
+    replyTo?: { address: string; name: string }[];
   };
 }
 
