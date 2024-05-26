@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -32,3 +33,4 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git add -f dist 
           git commit -m "dist folder"
+          git push 
