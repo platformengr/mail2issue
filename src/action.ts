@@ -1,4 +1,5 @@
 import * as core from "@actions/core";
+import * as github from "@actions/github";
 import StateProvider from "./StateProvider";
 import IssueProvider from "./IssueProvider";
 import MailProvider, { MailProviderOptions } from "./MailProvider";
@@ -15,7 +16,9 @@ async function run() {
   if (!task) throw new Error("Task is required");
   const token = core.getInput("token");
   if (!token) throw new Error("GITHUB_TOKEN is required");
+
   core.info("task is " + task);
+
 
   const mailConfig = JSON.parse(
     core.getInput("mail-config"),
@@ -27,6 +30,7 @@ async function run() {
   const mail2Issue = new Mail2Issue(mailProvider, issueProvider, stateProvider);
 
   if (task === "sync") await mail2Issue.syncIncoming();
+  if (task === "issueAction") await handleIssueAction(mail2Issue);
   else if (task === "test")
     await testMailConnection(mailProvider, mailConfig.emailAddress);
   else throw new Error("Invalid task");
@@ -48,11 +52,11 @@ async function testMailConnection(
 ) {
   core.info("EMAIL CONNECTION TEST:");
   core.info("Sending test email");
-  await mailProvider.sendEmail(
-    emailAddress,
-    "Test Email",
-    "This is a test email from the mail2issue action",
-  );
+  await mailProvider.sendEmail({
+    to:[emailAddress],
+    subject:"Test Email",
+    text:"This is a test email from the mail2issue action",
+});
   core.info("Test email sent successfully");
   //wait for 5 seconds to allow the email to be sent
   core.info("Waiting for 5 seconds");
@@ -68,3 +72,19 @@ function getYesterday() {
   yesterday.setDate(yesterday.getDate() - 1);
   return yesterday;
 }
+async function handleIssueAction(mail2Issue:Mail2Issue) {
+  const payload = github.context.payload;
+  const isComment = payload.comment?.id;
+  if (isComment) {
+    core.info("Comment event detected");
+    await mail2Issue.handleCommentEvent({
+      issueId: payload.issue!.number,
+      id: payload.comment!.id,
+    });
+ 
+
+
+
+
+}
+

@@ -16,7 +16,7 @@ export interface MailProviderOptions {
 }
 
 export default class MailProvider {
-  private readonly emailAddress: string;
+  public readonly emailAddress: string;
   private readonly password: string;
   private readonly host: string;
   private readonly imap: Imap;
@@ -30,14 +30,14 @@ export default class MailProvider {
     this.imap = new Imap({
       user: this.emailAddress,
       password: this.password,
-      host: config.host,
+      host: this.host,
 
       port: config.imap?.port ?? 993,
       tls: config.imap?.tls ?? true,
     });
 
     this.transporter = nodemailer.createTransport({
-      host: config.smtp?.host ?? config.host,
+      host: config.smtp?.host ?? this.host,
       port: config.smtp?.port ?? 587,
       secure: config.smtp?.port === 465 ? true : false, // https://nodemailer.com/about/
       auth: {
@@ -55,16 +55,23 @@ export default class MailProvider {
    * @param text - The content of the email.
    * @returns A Promise that resolves when the email is sent successfully, or rejects with an error if sending fails.
    */
-  public sendEmail = async (
-    to: string,
-    subject: string,
-    text: string,
-  ): Promise<void> => {
+  public sendEmail = async ({
+    to,
+    cc,
+    subject,
+    text,
+  }: {
+    to: string[];
+    cc?: string[];
+    subject: string;
+    text: string;
+  }): Promise<void> => {
     return new Promise((resolve, reject) => {
       this.transporter.sendMail(
         {
           from: this.emailAddress,
           to,
+          cc,
           subject,
           text,
         },

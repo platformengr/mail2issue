@@ -131,7 +131,7 @@ describe("Mail2Issue", () => {
     expect(issueProvider.commentIssue).toHaveBeenCalledTimes(1);
     expect(issueProvider.commentIssue).toHaveBeenCalledWith(
       10001,
-      newFixture.body,
+      newFixture.VisibleText,
     );
     expect(issueProvider.createIssue).toHaveBeenCalledTimes(0);
   });

@@ -15,7 +15,7 @@
       }
     ],
     "subject": "Subject 1",
-    "body": "Body of the message 1",
+    "VisibleText": "Visible Text of the message 1",
     "date": "2022-01-01T00:00:00.000Z",
     "replyTo": "replyto1@example.com",
     "attachments": []
@@ -36,7 +36,7 @@
       }
     ],
     "subject": "Subject 2",
-    "body": "Body of the message 2",
+    "VisibleText": "Visible Text of the message 2",
     "date": "2022-02-01T00:00:00.000Z",
     "replyTo": "replyto2@example.com",
     "attachments": []
@@ -57,7 +57,7 @@
       }
     ],
     "subject": "Subject 3",
-    "body": "Body of the message 3",
+    "VisibleText": "Visible Text of the message 3",
     "date": "2022-03-01T00:00:00.000Z",
     "replyTo": "replyto3@example.com",
     "attachments": []

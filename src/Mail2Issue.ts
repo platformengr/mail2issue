@@ -1,10 +1,12 @@
 import MailProvider, { FetchedEmail } from "./MailProvider";
 import IssueProvider from "./IssueProvider";
 import StateProvider from "./StateProvider";
+import { Comment, meta } from "./types";
 
 const NUMBER_OF_EMAILS = 30;
 const DAYS_BACK = 1;
 export default class Mail2Issue {
+ 
   private readonly mailbox: MailProvider;
   private readonly github;
   private readonly state;
@@ -85,4 +87,51 @@ export default class Mail2Issue {
     const promise = sorted.map(this.handleIncoming);
     await Promise.all(promise);
   };
+
+  private replyTitle =  (title:string, issueId: number) => `Re: [:${issueId}] ${title}`; //example: `Re: [:123] Problem with the app`
+  private findCommands= (body: string) => {
+    // commands starts with / and ends with space or new line or end of string
+    const comments: {key: string, value?: string}[] = [];
+
+    const regexInternal = /\/internal+(?=\s|\n|$)/g;
+    if (regexInternal.test(body)) comments.push({key: "internal"});
+    return comments;
+  }
+  private removeCommands = (body: string) => {
+    const regex = /\/\w+/g;
+    const newBody = body.replace(regex, '');
+    return newBody;
+  }
+
+  private flattenToEmails = (meta: meta) => {
+    const contacts = [...meta.from, ...meta.toReceivers].map(e => e.address);
+    const replyTo = meta.replyTo?.map(e => e.address) ?? [];
+    contacts.push(...replyTo);
+    const uniqueContacts = [...new Set(contacts)];
+
+    return uniqueContacts
+     .filter(e => e !== this.mailbox.emailAddress);     //remove our own email address
+  }
+  
+  /**
+   * Handles the comment event.
+   * 
+   * @param comment - The comment object.
+   */
+  public handleCommentEvent= async (comment: Comment)=> {
+    const commands = this.findCommands(comment.body);
+    if (commands.find(c => c.key === "internal")) return;
+
+    const issue = await this.github.getIssue(comment.issueId);
+    const title = this.replyTitle(issue.title, comment.issueId);
+    const body = this.removeCommands(comment.body);
+    this.mailbox.sendEmail({
+      to: this.flattenToEmails(issue.meta),
+      cc: issue.meta?.ccReceivers?.map(e => e.address) ?? undefined,
+      subject: title,
+      text: body,
+    });
+  }
 }
+
+

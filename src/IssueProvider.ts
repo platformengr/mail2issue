@@ -1,20 +1,5 @@
 import * as github from "@actions/github";
-
-type MessageTypes = "original" | "reply";
-
-interface createIssue {
-  title: string;
-  body: string;
-  meta: {
-    uid: number;
-    type: MessageTypes;
-    messageId?: string;
-    from: { address: string; name: string }[];
-    toReceivers: { address: string; name: string }[];
-    ccReceivers?: { address: string; name: string }[];
-    replyTo?: { address: string; name: string }[];
-  };
-}
+import { createIssue, meta } from "./types";
 
 export default class IssueProvider {
   private readonly octokit;
@@ -36,7 +21,7 @@ export default class IssueProvider {
    * @param {any} options.meta - The meta data associated with the issue.
    * @returns {Promise<any>} - A promise that resolves to the newly created issue.
    */
-  async createIssue({ title, body, meta }: createIssue) {
+  public async createIssue({ title, body, meta }: createIssue): Promise<any> {
     const newIssue = await this.octokit.rest.issues.create({
       ...this.base,
       title,
@@ -45,15 +30,49 @@ export default class IssueProvider {
     return newIssue;
   }
 
-  async getIssue(id: number) {
-    const issue = await this.octokit.rest.issues.get({
-      ...this.base,
-      issue_number: id,
-    });
-    return issue;
+
+  /**
+   * Retrieves an issue by its ID.
+   * @param id - The ID of the issue to retrieve.
+   * @returns An object containing the ID, title, body, and meta of the issue.
+   * @throws Error if the issue body is empty.
+   */
+  public async getIssue(id: number) {
+    const  issue = await this.octokit.rest.issues.get({
+        ...this.base,
+        issue_number: id,
+      });
+
+    const bodyWithMeta = issue?.data?.body;
+    if (!bodyWithMeta) throw new Error("Issue body is empty, Issue id: " + id);
+    const meta = this.extractMeta(bodyWithMeta, id);
+    const body  = bodyWithMeta.replace(/<!--([\s\S]+?)-->/, "");
+
+    return {
+      id: issue.data.id,
+      title: issue.data.title,
+      body: body,
+      meta: meta,
+    };
   }
 
-  async commentIssue(id: number, body: string) {
+  private extractMeta(body: string , id: number) {
+
+    const metaString = body.match(/<!--([\s\S]+?)-->/);
+    if (!metaString) throw new Error("Issue meta data is missing, Issue id: " + id);
+    if (!metaString[0]) throw new Error("Issue meta data is empty, Issue id: " + id);
+
+    const meta = JSON.parse(metaString[0]) as meta;
+    return meta;
+  }
+
+  /**
+   * Adds a comment to an existing issue.
+   * @param id - The ID of the issue.
+   * @param body - The body of the comment.
+   * @returns A promise that resolves to the newly created comment.
+   */
+  public async commentIssue(id: number, body: string) {
     const newComment = await this.octokit.rest.issues.createComment({
       ...this.base,
       issue_number: id,
