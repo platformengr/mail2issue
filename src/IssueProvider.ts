@@ -30,7 +30,6 @@ export default class IssueProvider {
     return newIssue;
   }
 
-
   /**
    * Retrieves an issue by its ID.
    * @param id - The ID of the issue to retrieve.
@@ -38,15 +37,15 @@ export default class IssueProvider {
    * @throws Error if the issue body is empty.
    */
   public async getIssue(id: number) {
-    const  issue = await this.octokit.rest.issues.get({
-        ...this.base,
-        issue_number: id,
-      });
+    const issue = await this.octokit.rest.issues.get({
+      ...this.base,
+      issue_number: id,
+    });
 
     const bodyWithMeta = issue?.data?.body;
     if (!bodyWithMeta) throw new Error("Issue body is empty, Issue id: " + id);
     const meta = this.extractMeta(bodyWithMeta, id);
-    const body  = bodyWithMeta.replace(/<!--([\s\S]+?)-->/, "");
+    const body = bodyWithMeta.replace(/<!--([\s\S]+?)-->/, "");
 
     return {
       id: issue.data.id,
@@ -56,11 +55,12 @@ export default class IssueProvider {
     };
   }
 
-  private extractMeta(body: string , id: number) {
-
+  private extractMeta(body: string, id: number) {
     const metaString = body.match(/<!--([\s\S]+?)-->/);
-    if (!metaString) throw new Error("Issue meta data is missing, Issue id: " + id);
-    if (!metaString[0]) throw new Error("Issue meta data is empty, Issue id: " + id);
+    if (!metaString)
+      throw new Error("Issue meta data is missing, Issue id: " + id);
+    if (!metaString[0])
+      throw new Error("Issue meta data is empty, Issue id: " + id);
 
     const meta = JSON.parse(metaString[0]) as meta;
     return meta;

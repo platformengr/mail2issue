@@ -1,5 +1,8 @@
 type MessageTypes = "original" | "reply";
-interface mailContact { address: string; name?: string; }
+interface mailContact {
+  address: string;
+  name?: string;
+}
 export interface meta {
   uid: number;
   type: MessageTypes;
@@ -13,7 +16,6 @@ export interface createIssue {
   title: string;
   body: string;
   meta: meta;
-
 }
 interface Issue extends createIssue {
   id: number;
@@ -23,5 +25,3 @@ export interface Comment {
   issueId: number;
   body: string;
 }
-
-

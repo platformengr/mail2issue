@@ -19,7 +19,6 @@ async function run() {
 
   core.info("task is " + task);
 
-
   const mailConfig = JSON.parse(
     core.getInput("mail-config"),
   ) as MailProviderOptions;
@@ -53,10 +52,10 @@ async function testMailConnection(
   core.info("EMAIL CONNECTION TEST:");
   core.info("Sending test email");
   await mailProvider.sendEmail({
-    to:[emailAddress],
-    subject:"Test Email",
-    text:"This is a test email from the mail2issue action",
-});
+    to: [emailAddress],
+    subject: "Test Email",
+    text: "This is a test email from the mail2issue action",
+  });
   core.info("Test email sent successfully");
   //wait for 5 seconds to allow the email to be sent
   core.info("Waiting for 5 seconds");
@@ -72,7 +71,7 @@ function getYesterday() {
   yesterday.setDate(yesterday.getDate() - 1);
   return yesterday;
 }
-async function handleIssueAction(mail2Issue:Mail2Issue) {
+async function handleIssueAction(mail2Issue: Mail2Issue) {
   const payload = github.context.payload;
   const isComment = payload.comment?.id;
   if (isComment) {
@@ -80,11 +79,7 @@ async function handleIssueAction(mail2Issue:Mail2Issue) {
     await mail2Issue.handleCommentEvent({
       issueId: payload.issue!.number,
       id: payload.comment!.id,
+      body: payload.comment!.body,
     });
- 
-
-
-
-
+  }
 }
-
