@@ -10,9 +10,11 @@ jobs:
   build:
     permissions:
       contents: write
+      pull-requests: write
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -30,32 +32,33 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Bump version
-        id: bump
-        run: |
-          npm install -g standard-version
-          TYPE=$(git log -1 --pretty=%B | head -n 1 | cut -d ':' -f 1)
-          if [ "$TYPE" = "feat" ]; then
-              BUMP="minor"
-          elif [ "$TYPE" = "fix" ]; then
-              BUMP="patch"
-          else
-          echo "Nothing to do, exiting workflow."
-          exit 0
-          fi
-          npx standard-version --$BUMP 
-          recent_tag=$(git describe --tags)
-          major_version="${recent_tag%%.*}"
-          minor_version="${recent_tag%.*}"
-          git tag "$major_version"
-          git tag "$minor_version"
-          echo "::set-output name=recent_tag::$recent_tag"
-
 
       - name: commit dist folder
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add -f dist 
-          git commit -m "release: ${{ steps.bump.outputs.recent_tag }}"
-          git push --follow-tags
+          git commit -m "auto release"
+          git push 
+
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+         release-type: node
+
+    
+      - name: Bump version
+        id: bump
+        run: |
+          git tag -d v${{ steps.release.outputs.major }} || true
+          git tag -d v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }} || true
+          git push origin :v${{ steps.release.outputs.major }} || true
+          git push origin :v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }} || true
+          git tag -a v${{ steps.release.outputs.major }} -m "Release v${{ steps.release.outputs.major }}"
+          git tag -a v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }} -m "Release v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}"
+          git push origin v${{ steps.release.outputs.major }}
+          git push origin v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }}
+
+          
+
+
