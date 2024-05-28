@@ -1,9 +1,10 @@
 {
   "name": "mail2isseus",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "github action that make issues of emails",
   "main": "index.js",
   "scripts": {
+    "release": "standard-version",
     "build": "ncc build src/action.ts  -s -o dist",
     "test": "jest",
     "format": "pretty-quick --no-restage",
@@ -32,6 +33,7 @@
     "jest": "^29.7.0",
     "prettier": "^3.2.5",
     "pretty-quick": "^4.0.0",
+    "standard-version": "^9.5.0",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5"
