@@ -27,10 +27,35 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Test
+        run: npm test
+
+      - name: Bump version
+        id: bump
+        run: |
+          npm install -g standard-version
+          TYPE=$(git log -1 --pretty=%B | head -n 1 | cut -d ':' -f 1)
+          if [ "$TYPE" = "feat" ]; then
+              BUMP="minor"
+          elif [ "$TYPE" = "fix" ]; then
+              BUMP="patch"
+          else
+          echo "Nothing to do, exiting workflow."
+          exit 0
+          fi
+          npx standard-version --$BUMP 
+          recent_tag=$(git describe --tags)
+          major_version="${recent_tag%%.*}"
+          minor_version="${recent_tag%.*}"
+          git tag "$major_version"
+          git tag "$minor_version"
+          echo "::set-output name=recent_tag::$recent_tag"
+
+
       - name: commit dist folder
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git add -f dist 
-          git commit -m "dist folder"
-          git push
+          git commit -m "release: ${{ steps.bump.outputs.recent_tag }}"
+          git push --follow-tags
