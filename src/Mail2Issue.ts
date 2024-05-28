@@ -3,7 +3,7 @@ import IssueProvider from "./IssueProvider";
 import StateProvider from "./StateProvider";
 import { Comment, meta } from "./types";
 
-const NUMBER_OF_EMAILS = 30;
+const NUMBER_OF_EMAILS = 10; //Not To Blast GitHub
 const DAYS_BACK = 1;
 export default class Mail2Issue {
   private readonly mailbox: MailProvider;
