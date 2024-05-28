@@ -29,10 +29,10 @@ async function run() {
   const mail2Issue = new Mail2Issue(mailProvider, issueProvider, stateProvider);
 
   if (task === "sync") await mail2Issue.syncIncoming();
-  if (task === "issueAction") await handleIssueAction(mail2Issue);
+  else if (task === "issueAction") await handleIssueAction(mail2Issue);
   else if (task === "test")
     await testMailConnection(mailProvider, mailConfig.emailAddress);
-  else throw new Error("Invalid task");
+  else throw new Error("Invalid task input, must be 'sync', 'issueAction', or 'test'");
 }
 
 if (process.env.NODE_ENV !== "test") {
