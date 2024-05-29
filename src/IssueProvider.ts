@@ -67,7 +67,7 @@ export default class IssueProvider {
     if (!metaString[1])
       throw new Error("Issue meta data is empty, Issue id: " + id);
 
-    const meta = JSON.parse(metaString[0]) as meta;
+    const meta = JSON.parse(metaString[1]) as meta;
     return meta;
   }
 
