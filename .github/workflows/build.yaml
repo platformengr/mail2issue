@@ -50,6 +50,7 @@ jobs:
       - name: Bump version
         id: bump
         run: |
+          git pull
           git tag -d v${{ steps.release.outputs.major }} || true
           git tag -d v${{ steps.release.outputs.major }}.${{ steps.release.outputs.minor }} || true
           git push origin :v${{ steps.release.outputs.major }} || true
