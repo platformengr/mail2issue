@@ -120,7 +120,7 @@ export default class MailProvider {
           this.imap.search(criteria, (err, results) => {
             if (err) reject(err);
 
-            const selected = results.slice(-limit);
+            const selected = results.slice(0, limit);
 
             const fetchResults = this.imap.fetch(selected, {
               bodies: "",
