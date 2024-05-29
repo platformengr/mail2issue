@@ -178,7 +178,7 @@ export default class MailProvider {
                   }[],
                   messageId: email.headers.get("message-id")?.toString(),
                   references: email.headers.get("references"),
-                  toReivers: (email.headers.get("from") as any).value as {
+                  toReivers: (email.headers.get("to") as any).value as {
                     address: string;
                     name: string;
                   }[],
@@ -221,13 +221,14 @@ interface EmailData {
 /**
  * Represents a fetched email.
  */
+interface contact { address: string; name: string }
 export interface FetchedEmail {
   uid: number;
-  senders: { address: string; name: string }[];
+  senders: contact[];
   messageId?: string;
-  toReivers: { address: string; name: string }[];
-  ccReivers?: { address: string; name: string }[];
-  replyTo?: { address: string; name: string }[];
+  toReivers: contact[];
+  ccReivers?: contact[];
+  replyTo?: contact[];
   subject: string;
   body?: string;
   text?: string;

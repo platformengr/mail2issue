@@ -22,10 +22,15 @@ export default class IssueProvider {
    * @returns {Promise<any>} - A promise that resolves to the newly created issue.
    */
   public async createIssue({ title, body, meta }: createIssue): Promise<any> {
+    const senderHasName = !!meta.from[0].name;
+    const sender = `[${senderHasName ? meta.from[0].name : meta.from[0].address}](${`mailto:${meta.from[0].address}`})`;
+    const metaString = `<!--JSON${JSON.stringify(meta)}-->`;
+
     const newIssue = await this.octokit.rest.issues.create({
       ...this.base,
       title,
-      body: "<!--" + JSON.stringify(meta) + "-->\n" + body,
+      body: `${metaString}\n\n**From:** ${sender}\n\n  --- \n\n${body}`,
+       
     });
     return newIssue;
   }
@@ -45,7 +50,7 @@ export default class IssueProvider {
     const bodyWithMeta = issue?.data?.body;
     if (!bodyWithMeta) throw new Error("Issue body is empty, Issue id: " + id);
     const meta = this.extractMeta(bodyWithMeta, id);
-    const body = bodyWithMeta.replace(/<!--([\s\S]+?)-->/, "");
+    const body = bodyWithMeta.replace(/<!--JSON([\s\S]+?)-->/, "");
 
     return {
       id: issue.data.id,
@@ -56,10 +61,10 @@ export default class IssueProvider {
   }
 
   private extractMeta(body: string, id: number) {
-    const metaString = body.match(/<!--([\s\S]+?)-->/);
+    const metaString = body.match(/<!--JSON([\s\S]+?)-->/);
     if (!metaString)
       throw new Error("Issue meta data is missing, Issue id: " + id);
-    if (!metaString[0])
+    if (!metaString[1])
       throw new Error("Issue meta data is empty, Issue id: " + id);
 
     const meta = JSON.parse(metaString[0]) as meta;
