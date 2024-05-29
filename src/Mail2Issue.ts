@@ -33,7 +33,7 @@ export default class Mail2Issue {
   };
 
   private handleNewTicket = async (mail: FetchedEmail) => {
-    const title = mail.subject;
+    const title = mail.subject?? "No Subject";
     const body = mail.VisibleText;
     return await this.github.createIssue({
       title,
