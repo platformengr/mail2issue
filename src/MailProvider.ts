@@ -221,7 +221,10 @@ interface EmailData {
 /**
  * Represents a fetched email.
  */
-interface contact { address: string; name: string }
+interface contact {
+  address: string;
+  name: string;
+}
 export interface FetchedEmail {
   uid: number;
   senders: contact[];

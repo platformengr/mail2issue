@@ -24,6 +24,7 @@ jest.mock(
     default: jest.fn().mockImplementation(() => ({
       createIssue: jest.fn(() => Promise.resolve()),
       commentIssue: jest.fn(() => Promise.resolve()),
+      setIssueComment: jest.fn(() => Promise.resolve()),
     })),
   })),
 );
@@ -128,11 +129,25 @@ describe("Mail2Issue", () => {
     );
     await mail2Issue.syncIncoming();
 
-    expect(issueProvider.commentIssue).toHaveBeenCalledTimes(1);
-    expect(issueProvider.commentIssue).toHaveBeenCalledWith(
-      10001,
-      newFixture.VisibleText,
-    );
+    expect(issueProvider.setIssueComment).toHaveBeenCalledTimes(1);
+    expect(issueProvider.setIssueComment).toHaveBeenCalledWith({
+      id: 10001,
+      body: newFixture.VisibleText,
+      meta: {
+        type: "user-reply",
+        from: [{ address: "sender1@example.com", name: "Sender One" }],
+        ccReceivers: undefined,
+        messageId: "message1",
+        replyTo: "replyto1@example.com",
+        toReceivers: [
+          {
+            address: "receiver1@example.com",
+            name: "Receiver One",
+          },
+        ],
+        uid: 20001,
+      },
+    });
     expect(issueProvider.createIssue).toHaveBeenCalledTimes(0);
   });
 });

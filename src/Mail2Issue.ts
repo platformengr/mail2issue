@@ -1,18 +1,22 @@
 import MailProvider, { FetchedEmail } from "./MailProvider";
 import IssueProvider from "./IssueProvider";
 import StateProvider from "./StateProvider";
-import { Comment, meta } from "./types";
+import { Comment, Meta } from "./types";
 
 const NUMBER_OF_EMAILS = 10; //Not To Blast GitHub
 const DAYS_BACK = 1;
 export default class Mail2Issue {
   private readonly mailbox: MailProvider;
-  private readonly github;
+  private readonly issueProvider;
   private readonly state;
 
-  constructor(mail: MailProvider, issue: IssueProvider, state: StateProvider) {
+  constructor(
+    mail: MailProvider,
+    issueProvider: IssueProvider,
+    state: StateProvider,
+  ) {
     this.mailbox = mail;
-    this.github = issue;
+    this.issueProvider = issueProvider;
     this.state = state;
   }
 
@@ -33,9 +37,9 @@ export default class Mail2Issue {
   };
 
   private handleNewTicket = async (mail: FetchedEmail) => {
-    const title = mail.subject?? "No Subject";
+    const title = mail.subject ?? "No Subject";
     const body = mail.VisibleText;
-    return await this.github.createIssue({
+    return await this.issueProvider.createIssue({
       title,
       body,
       meta: {
@@ -51,12 +55,24 @@ export default class Mail2Issue {
   };
 
   private handleReplay = async (mail: FetchedEmail, regex: RegExp) => {
-    const match = mail.subject?.match(regex);
+    const match = mail.subject?.match(regex); //example: [:123] my issue title
     if (!match)
       throw new Error("could not find issue id in subject :" + mail.subject);
     const issueId = parseInt(match[0].slice(2, -1));
     const body = mail.VisibleText;
-    await this.github.commentIssue(issueId, body);
+    await this.issueProvider.setIssueComment({
+      id: issueId,
+      body,
+      meta: {
+        from: mail.senders,
+        toReceivers: mail.toReivers,
+        ccReceivers: mail.ccReivers,
+        replyTo: mail.replyTo,
+        uid: mail.uid,
+        messageId: mail.messageId,
+        type: "user-reply",
+      },
+    });
   };
 
   private handleIncoming = async (mail: FetchedEmail) => {
@@ -103,8 +119,12 @@ export default class Mail2Issue {
     return newBody;
   };
 
-  private flattenToEmails = (meta: meta) => {
-    const contacts = [...meta.from, ...meta.toReceivers].map((e) => e.address);
+  private flattenToEmails = (meta: Meta) => {
+    if (!(meta?.from && meta.ccReceivers && meta.ccReceivers.length > 0))
+      throw new Error("Meta or From or toReceivers is missing");
+    const contacts = [...(meta.from ?? []), ...(meta.toReceivers ?? [])].map(
+      (e) => e.address,
+    );
     const replyTo = meta.replyTo?.map((e) => e.address) ?? [];
     contacts.push(...replyTo);
     const uniqueContacts = [...new Set(contacts)];
@@ -112,6 +132,13 @@ export default class Mail2Issue {
     return uniqueContacts.filter((e) => e !== this.mailbox.emailAddress); //remove our own email address
   };
 
+  private handleInternalComment = async (comment: Comment) => {
+    const meta = {
+      type: "internal-note",
+      from: comment.from,
+    } as Meta;
+    await this.issueProvider.addMeta({ comment, meta });
+  };
   /**
    * Handles the comment event.
    *
@@ -119,16 +146,22 @@ export default class Mail2Issue {
    */
   public handleCommentEvent = async (comment: Comment) => {
     const commands = this.findCommands(comment.body);
-    if (commands.find((c) => c.key === "internal")) return;
-
-    const issue = await this.github.getIssue(comment.issueId);
-    const title = this.replyTitle(issue.title, comment.issueId);
-    const body = this.removeCommands(comment.body);
-    this.mailbox.sendEmail({
-      to: this.flattenToEmails(issue.meta),
-      cc: issue.meta?.ccReceivers?.map((e) => e.address) ?? undefined,
-      subject: title,
-      text: body,
-    });
+    if (commands.find((c) => c.key === "internal"))
+      await this.handleInternalComment(comment);
+    else await this.handleUserReply(comment);
   };
+
+  private async handleUserReply(comment: Comment) {
+    {
+      const issue = await this.issueProvider.getIssue(comment.issueId);
+      const title = this.replyTitle(issue.title, comment.issueId);
+      const body = this.removeCommands(comment.body);
+      this.mailbox.sendEmail({
+        to: this.flattenToEmails(issue.meta),
+        cc: issue.meta?.ccReceivers?.map((e) => e.address) ?? undefined,
+        subject: title,
+        text: body,
+      });
+    }
+  }
 }

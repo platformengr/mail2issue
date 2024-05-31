@@ -1,27 +1,28 @@
-type MessageTypes = "original" | "reply";
-interface mailContact {
+type MessageTypes = "original" | "user-reply" | "agent-reply" | "internal-note";
+interface MailContact {
   address: string;
   name?: string;
 }
-export interface meta {
-  uid: number;
+export interface Meta {
+  from: MailContact[];
   type: MessageTypes;
+  uid?: number;
   messageId?: string;
-  from: mailContact[];
-  toReceivers: mailContact[];
-  ccReceivers?: mailContact[];
-  replyTo?: mailContact[];
+  toReceivers?: MailContact[];
+  ccReceivers?: MailContact[];
+  replyTo?: MailContact[];
 }
-export interface createIssue {
+export interface CreateIssue {
   title: string;
   body: string;
-  meta: meta;
+  meta: Meta;
 }
-interface Issue extends createIssue {
+interface Issue extends CreateIssue {
   id: number;
 }
 export interface Comment {
   id: number;
   issueId: number;
   body: string;
+  from: MailContact[];
 }

@@ -32,7 +32,10 @@ async function run() {
   else if (task === "issueAction") await handleIssueAction(mail2Issue);
   else if (task === "test")
     await testMailConnection(mailProvider, mailConfig.emailAddress);
-  else throw new Error("Invalid task input, must be 'sync', 'issueAction', or 'test'");
+  else
+    throw new Error(
+      "Invalid task input, must be 'sync', 'issueAction', or 'test'",
+    );
 }
 
 if (process.env.NODE_ENV !== "test") {
@@ -80,6 +83,12 @@ async function handleIssueAction(mail2Issue: Mail2Issue) {
       issueId: payload.issue!.number,
       id: payload.comment!.id,
       body: payload.comment!.body,
+      from: [
+        {
+          name: payload.comment!.user.login,
+          address: payload.comment!.user.email,
+        },
+      ],
     });
   }
 }
