@@ -4,6 +4,7 @@ import StateProvider from "./StateProvider";
 import IssueProvider from "./IssueProvider";
 import MailProvider, { MailProviderOptions } from "./MailProvider";
 import Mail2Issue from "./Mail2Issue";
+import { MessageTypes } from "./types";
 
 /**
  * Runs the main logic of the action.
@@ -68,7 +69,6 @@ async function testMailConnection(
   if (emails.length === 0) throw new Error("No emails found");
   core.info("Test email received successfully");
 }
-
 function getYesterday() {
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
@@ -83,12 +83,15 @@ async function handleIssueAction(mail2Issue: Mail2Issue) {
       issueId: payload.issue!.number,
       id: payload.comment!.id,
       body: payload.comment!.body,
-      from: [
-        {
-          name: payload.comment!.user.login,
-          address: payload.comment!.user.email,
-        },
-      ],
+      meta: {
+        type: MessageTypes.AgentReply,
+        from: [
+          {
+            name: payload.comment!.user.login,
+            address: payload.comment!.user.email,
+          },
+        ],
+      },
     });
   }
 }

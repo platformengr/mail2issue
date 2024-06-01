@@ -1,7 +1,7 @@
 import MailProvider, { FetchedEmail } from "./MailProvider";
 import IssueProvider from "./IssueProvider";
 import StateProvider from "./StateProvider";
-import { Comment, Meta } from "./types";
+import { Comment, MessageTypes, Meta } from "./types";
 
 const NUMBER_OF_EMAILS = 10; //Not To Blast GitHub
 const DAYS_BACK = 1;
@@ -49,7 +49,7 @@ export default class Mail2Issue {
         replyTo: mail.replyTo,
         uid: mail.uid,
         messageId: mail.messageId,
-        type: "original",
+        type: MessageTypes.Original,
       },
     });
   };
@@ -59,9 +59,9 @@ export default class Mail2Issue {
     if (!match)
       throw new Error("could not find issue id in subject :" + mail.subject);
     const issueId = parseInt(match[0].slice(2, -1));
-    const body = mail.VisibleText;
-    await this.issueProvider.setIssueComment({
-      id: issueId,
+    const body = mail.VisibleText as string;
+    await this.issueProvider.createIssueComment({
+      issueId,
       body,
       meta: {
         from: mail.senders,
@@ -70,7 +70,7 @@ export default class Mail2Issue {
         replyTo: mail.replyTo,
         uid: mail.uid,
         messageId: mail.messageId,
-        type: "user-reply",
+        type: MessageTypes.UserReply,
       },
     });
   };
@@ -133,11 +133,9 @@ export default class Mail2Issue {
   };
 
   private handleInternalComment = async (comment: Comment) => {
-    const meta = {
-      type: "internal-note",
-      from: comment.from,
-    } as Meta;
-    await this.issueProvider.addMeta({ comment, meta });
+    const commentCopy = { ...comment };
+    commentCopy.meta.type = MessageTypes.InternalNote;
+    await this.issueProvider.createIssueComment(comment);
   };
   /**
    * Handles the comment event.

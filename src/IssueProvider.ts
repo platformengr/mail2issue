@@ -1,5 +1,9 @@
 import * as github from "@actions/github";
-import { CreateIssue, Meta } from "./types";
+import { CreateIssue, Meta, Comment, MessageTypes } from "./types";
+import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
+
+type IssueComment =
+  RestEndpointMethodTypes["issues"]["getComment"]["response"]["data"];
 
 export default class IssueProvider {
   private readonly octokit;
@@ -82,55 +86,94 @@ export default class IssueProvider {
    * @param body - The body of the comment.
    * @returns A promise that resolves to the newly created comment.
    */
-  public setIssueComment = async ({
-    id,
-    body,
-    meta,
-  }: {
-    id: number;
-    body: string;
-    meta: Meta;
-  }) => {
+  public createIssueComment = async ({ id, issueId, body, meta }: Comment) => {
     const { metaString, sender } = this.formatMeta(meta);
 
-    await this.octokit.rest.issues.createComment({
-      ...this.base,
-      issue_number: id,
-      body: `${metaString}\n\n**From:** ${sender}\n\n  --- \n\n${body}`,
-    });
+    //Github specific implementation for comments made by the user using ui first time
+    if (id)
+      await this.updateAlreadyExistingGithubComment(
+        id,
+        metaString,
+        sender,
+        body,
+      );
+    else
+      await this.octokit.rest.issues.createComment({
+        ...this.base,
+        issue_number: issueId,
+        body: `${metaString}\n\n**From:** ${sender}\n\n  --- \n\n${body}`,
+      });
   };
+
+  private async updateAlreadyExistingGithubComment(
+    id: number,
+    metaString: string,
+    sender: string,
+    body: string,
+  ) {
+    const comment = await this.octokit.rest.issues.getComment({
+      ...this.base,
+      comment_id: id,
+    });
+    if (comment.data.body?.includes("<!--JSON"))
+      throw new Error("Comment already has meta data");
+    await this.octokit.rest.issues.updateComment({
+      comment_id: id,
+      body: `${metaString}\n\n**From:** ${sender}\n\n  --- \n\n${body}`,
+      ...this.base,
+    });
+  }
+
+  private async githubCommentToComment(c: IssueComment, issueId: number) {
+    // github specific implementation for comments made by the user using ui
+    // in this case we leave the meta data empty to
+    let cleanBody = "";
+    let meta = { from: [], type: MessageTypes.Unknown } as Meta;
+
+    if (c.body?.includes("<!--JSON")) {
+      // the one with meta
+      const extract = this.extractMeta(c.body);
+      meta = extract.meta;
+      cleanBody = extract.cleanBody;
+    } else {
+      cleanBody = c.body ?? "";
+    }
+
+    //Github specific implementation for comments made by the user using ui
+    if (!meta.from[0]) {
+      const user = await this.octokit.rest.users.getByUsername({
+        username: c.user?.login as string,
+      });
+      meta.from = [
+        {
+          address: user.data.email ?? "INTERNAL",
+          name: user.data.name ?? (c.user?.login as string) ?? "AGENT",
+        },
+      ];
+      if (!meta.type) meta.type = MessageTypes.Unknown;
+    }
+    return {
+      id: c.id,
+      issueId: issueId,
+      body: cleanBody,
+      meta: meta,
+    } as Comment;
+  }
 
   /**
    * Retrieves all comments associated with an issue.
    * @param issueId - The ID of the issue.
-   * @returns An array of comments associated with the issue.
+   * @returns  An array of comments associated with the issue.
    */
-  public async getIssueComment(issueId: number) {
-    const comments = await this.octokit.rest.issues.listComments({
+  public async getIssueComments(issueId: number) {
+    const githubComments = await this.octokit.rest.issues.listComments({
       ...this.base,
       issue_number: issueId,
     });
 
-    return comments.data.map((c) => {
-      if (!c.body) return;
-      const { cleanBody, meta } = this.extractMeta(c.body);
-      return { body: cleanBody, meta: meta };
-    });
+    const commentsPromise = githubComments.data.map(async (c) =>
+      this.githubCommentToComment(c, issueId),
+    );
+    return Promise.all(commentsPromise);
   }
-
-  public addMeta = async ({
-    comment,
-    meta,
-  }: {
-    comment: { id: number; body: string };
-    meta: Meta;
-  }) => {
-    const { metaString } = this.formatMeta(meta);
-    const newBody = `${metaString}\n\n --- \n\n${comment}`;
-    await this.octokit.rest.issues.updateComment({
-      comment_id: comment.id,
-      body: newBody,
-      ...this.base,
-    });
-  };
 }

@@ -24,7 +24,7 @@ jest.mock(
     default: jest.fn().mockImplementation(() => ({
       createIssue: jest.fn(() => Promise.resolve()),
       commentIssue: jest.fn(() => Promise.resolve()),
-      setIssueComment: jest.fn(() => Promise.resolve()),
+      createIssueComment: jest.fn(() => Promise.resolve()),
     })),
   })),
 );
@@ -48,7 +48,7 @@ jest.mock(
   })),
 );
 
-describe("Mail2Issue", () => {
+describe("Mail2Issue sync incoming", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -129,9 +129,9 @@ describe("Mail2Issue", () => {
     );
     await mail2Issue.syncIncoming();
 
-    expect(issueProvider.setIssueComment).toHaveBeenCalledTimes(1);
-    expect(issueProvider.setIssueComment).toHaveBeenCalledWith({
-      id: 10001,
+    expect(issueProvider.createIssueComment).toHaveBeenCalledTimes(1);
+    expect(issueProvider.createIssueComment).toHaveBeenCalledWith({
+      issueId: 10001,
       body: newFixture.VisibleText,
       meta: {
         type: "user-reply",

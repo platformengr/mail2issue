@@ -1,4 +1,11 @@
-type MessageTypes = "original" | "user-reply" | "agent-reply" | "internal-note";
+export enum MessageTypes {
+  Original = "original",
+  UserReply = "user-reply",
+  AgentReply = "agent-reply",
+  InternalNote = "internal-note",
+  Unknown = "unknown",
+}
+
 interface MailContact {
   address: string;
   name?: string;
@@ -20,9 +27,9 @@ export interface CreateIssue {
 interface Issue extends CreateIssue {
   id: number;
 }
-export interface Comment {
-  id: number;
+export type Comment = {
+  id?: number;
   issueId: number;
   body: string;
-  from: MailContact[];
-}
+  meta: Meta;
+};
