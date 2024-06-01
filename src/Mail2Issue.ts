@@ -132,10 +132,10 @@ export default class Mail2Issue {
     return uniqueContacts.filter((e) => e !== this.mailbox.emailAddress); //remove our own email address
   };
 
-  private handleInternalComment = async (comment: Comment) => {
-    const commentCopy = { ...comment };
+  private processInternalComment = async (comment: Comment) => {
+    const commentCopy = structuredClone(comment);
     commentCopy.meta.type = MessageTypes.InternalNote;
-    await this.issueProvider.createIssueComment(comment);
+    await this.issueProvider.createIssueComment(commentCopy);
   };
   /**
    * Handles the comment event.
@@ -145,20 +145,24 @@ export default class Mail2Issue {
   public handleCommentEvent = async (comment: Comment) => {
     const commands = this.findCommands(comment.body);
     if (commands.find((c) => c.key === "internal"))
-      await this.handleInternalComment(comment);
-    else await this.handleUserReply(comment);
+      await this.processInternalComment(comment);
+    else await this.processAgentAnswer(comment);
   };
 
-  private async handleUserReply(comment: Comment) {
+  private async processAgentAnswer(comment: Comment) {
     {
       const issue = await this.issueProvider.getIssue(comment.issueId);
+      const commentCopy = structuredClone(comment);
+      commentCopy.meta.type = MessageTypes.AgentReply;
+      this.issueProvider.createIssueComment(commentCopy);
+
       const title = this.replyTitle(issue.title, comment.issueId);
-      const body = this.removeCommands(comment.body);
+      const bodyForEmail = this.removeCommands(comment.body);
       this.mailbox.sendEmail({
         to: this.flattenToEmails(issue.meta),
         cc: issue.meta?.ccReceivers?.map((e) => e.address) ?? undefined,
         subject: title,
-        text: body,
+        text: bodyForEmail,
       });
     }
   }

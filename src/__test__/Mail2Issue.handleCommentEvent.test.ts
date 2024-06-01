@@ -1,8 +1,39 @@
 import Mail2Issue from "../Mail2Issue";
-import MailProvider, { FetchedEmail } from "../MailProvider";
+import MailProvider from "../MailProvider";
 import IssueProvider from "../IssueProvider";
 import StateProvider from "../StateProvider";
 import { MessageTypes, Comment } from "../types";
+
+
+const IssueFixture = {
+  id: 10001,
+  title: "Issue Title",
+  body: "This is an issue",
+  comments: [],
+  meta: {
+    from: [
+      {
+        name: "use1",
+        address: "email1",
+      }],
+    toReceivers: [
+      {
+        name: "Use2",
+        address: "email2"
+      }],
+    ccReceivers: [
+      {
+        name: "Use3",
+        address: "email3"
+      }],
+    replyTo: [
+      {
+        name: "Use4",
+        address: "email4"
+      }],
+    type: MessageTypes.Original,
+  }
+};
 
 jest.mock(
   "../MailProvider",
@@ -21,7 +52,8 @@ jest.mock(
     default: jest.fn().mockImplementation(() => ({
       createIssue: jest.fn(() => Promise.resolve()),
       commentIssue: jest.fn(() => Promise.resolve()),
-      createIssueComment: jest.fn(() => Promise.resolve()),
+      createIssueComment: jest.fn((c) => Promise.resolve()),
+      getIssue: jest.fn(() => Promise.resolve(IssueFixture)),
     })),
   })),
 );
@@ -55,7 +87,7 @@ const commentFixture: Comment = {
         address: "email@address.com",
       },
     ],
-    type: MessageTypes.AgentReply,
+    type: MessageTypes.Unknown,
   },
 };
 
@@ -76,18 +108,39 @@ describe("Mail2Issue handleCommentEvent", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it("should create new internal comment with meta", async () => {
+  it("should create new internal comment with meta for internal messages", async () => {
     const { mail2Issue, issueProvider, mailProvider } =
       createMail2IssueInstance();
     const comment = {
       ...commentFixture,
       body: "/internal \n This is a comment",
     };
+
+    const expected = {...comment, meta: { ...comment.meta, type: MessageTypes.InternalNote }};
     await mail2Issue.handleCommentEvent(comment);
     expect(issueProvider.createIssueComment).toHaveBeenCalledTimes(1);
-    expect(issueProvider.createIssueComment).toHaveBeenCalledWith({
-      ...comment,
-    });
+    expect(issueProvider.createIssueComment).toHaveBeenCalledWith(expected);
     expect(mailProvider.sendEmail).not.toHaveBeenCalled();
+  });
+
+  it("should create new internal comment with meta", async () => {
+    const { mail2Issue, issueProvider, mailProvider } =
+      createMail2IssueInstance();
+    const comment = {
+      ...commentFixture,
+      body: "This is a comment",
+    };
+    const expected = {...comment, meta: { ...comment.meta, type: MessageTypes.AgentReply }};
+
+    await mail2Issue.handleCommentEvent(comment);
+    expect(issueProvider.createIssueComment).toHaveBeenCalledTimes(1);
+    expect(issueProvider.createIssueComment).toHaveBeenCalledWith(expected);
+    expect(mailProvider.sendEmail).toHaveBeenCalledTimes(1);
+    expect(mailProvider.sendEmail).toHaveBeenCalledWith({
+      to: ["email1","email2", "email4"],
+      cc: ["email3"],
+      subject: "Re: [:10001] Issue Title",
+      text: "This is a comment",
+    });
   });
 });
