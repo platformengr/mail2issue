@@ -1,5 +1,5 @@
 import * as github from "@actions/github";
-import { CreateIssue, Meta, Comment, MessageTypes } from "./types";
+import { CreateIssue, Meta, Comment, MessageTypes, Issue } from "./types";
 import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
 
 type IssueComment =
@@ -62,7 +62,7 @@ export default class IssueProvider {
    * @returns An object containing the ID, title, body, and meta of the issue.
    * @throws Error if the issue body is empty.
    */
-  public async getIssue(id: number) {
+  public async getIssue(id: number): Promise<Issue> {
     const issue = await this.octokit.rest.issues.get({
       ...this.base,
       issue_number: id,
@@ -77,6 +77,7 @@ export default class IssueProvider {
       title: issue.data.title,
       body: cleanBody,
       meta: meta,
+      createdAt: new Date(issue.data.created_at),
     };
   }
 
@@ -156,6 +157,7 @@ export default class IssueProvider {
       id: c.id,
       issueId: issueId,
       body: cleanBody,
+      createdAt: new Date(c.created_at),
       meta: meta,
     } as Comment;
   }

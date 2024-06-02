@@ -10,7 +10,7 @@ interface MailContact {
   address: string;
   name?: string;
 }
-export interface Meta {
+export type Meta = {
   from: MailContact[];
   type: MessageTypes;
   uid?: number;
@@ -18,18 +18,20 @@ export interface Meta {
   toReceivers?: MailContact[];
   ccReceivers?: MailContact[];
   replyTo?: MailContact[];
-}
-export interface CreateIssue {
+};
+export type CreateIssue = {
   title: string;
   body: string;
   meta: Meta;
-}
-interface Issue extends CreateIssue {
+};
+export type Issue = CreateIssue & {
   id: number;
-}
+  createdAt: Date;
+};
 export type Comment = {
   id?: number;
   issueId: number;
   body: string;
   meta: Meta;
+  createdAt: Date;
 };

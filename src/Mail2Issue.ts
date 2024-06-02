@@ -63,6 +63,7 @@ export default class Mail2Issue {
     await this.issueProvider.createIssueComment({
       issueId,
       body,
+      createdAt: new Date(),
       meta: {
         from: mail.senders,
         toReceivers: mail.toReivers,
@@ -96,10 +97,10 @@ export default class Mail2Issue {
     if (incoming.length === 0) return;
 
     await this.state.lastSynced.set(new Date().toISOString());
-    const sorted = incoming.sort((a, b) => a.uid - b.uid);
-    await this.state.lastUidSynced.set(sorted.slice(-1)[0].uid.toString());
+    incoming.sort((a, b) => a.uid - b.uid);
+    await this.state.lastUidSynced.set(incoming.slice(-1)[0].uid.toString());
 
-    const promise = sorted.map(this.handleIncoming);
+    const promise = incoming.map(this.handleIncoming);
     await Promise.all(promise);
   };
 
@@ -150,20 +151,42 @@ export default class Mail2Issue {
   };
 
   private async processAgentAnswer(comment: Comment) {
-    {
-      const issue = await this.issueProvider.getIssue(comment.issueId);
-      const commentCopy = structuredClone(comment);
-      commentCopy.meta.type = MessageTypes.AgentReply;
-      this.issueProvider.createIssueComment(commentCopy);
+    const issue = await this.issueProvider.getIssue(comment.issueId);
 
-      const title = this.replyTitle(issue.title, comment.issueId);
-      const bodyForEmail = this.removeCommands(comment.body);
-      this.mailbox.sendEmail({
-        to: this.flattenToEmails(issue.meta),
-        cc: issue.meta?.ccReceivers?.map((e) => e.address) ?? undefined,
-        subject: title,
-        text: bodyForEmail,
-      });
-    }
+    const commentCopy = structuredClone(comment);
+    commentCopy.meta.type = MessageTypes.AgentReply;
+    this.issueProvider.createIssueComment(commentCopy);
+
+    const olderComments = await this.issueProvider.getIssueComments(
+      comment.issueId,
+    );
+
+    olderComments.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+    const comments = olderComments
+      .map((e) => {
+        const user = e.meta.from[0].name ?? e.meta.from[0].address;
+        const date = e.createdAt;
+        return `\n---\nFrom: ${user}\nDate:${date}\n${e.body}\n`;
+      })
+      .join("\n");
+
+    const issueUser = issue.meta.from[0].name ?? issue.meta.from[0].address;
+    const bodyForEmail = this.removeCommands(comment.body);
+    const mailBody =
+      bodyForEmail +
+      comments +
+      `\n---\nOriginal Issues:\nFrom: ${issueUser}\nDate: ${issue.createdAt}\nSubject: ${issue.title}\n\n${issue.body}\n`;
+
+    const title = this.replyTitle(issue.title, comment.issueId);
+    this.mailbox.sendEmail({
+      to: this.flattenToEmails(issue.meta),
+      cc: issue.meta?.ccReceivers?.map((e) => e.address) ?? undefined,
+      subject: title,
+      text: mailBody,
+    });
   }
 }

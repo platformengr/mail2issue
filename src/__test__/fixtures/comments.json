@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "issueId": 10,
+    "body": "I'm unable to log in to the application using my credentials. 01",
+    "createdAt": "2021-01-01T12:01:00Z",
+    "meta": {
+      "from": [
+        {
+          "address": "user@example.com",
+          "name": "John Doe"
+        }
+      ],
+      "type": "original",
+      "uid": 12345,
+      "messageId": "abc123def456",
+      "toReceivers": [
+        {
+          "address": "support@example.com"
+        }
+      ]
+    }
+  },
+  {
+    "id": 2,
+    "issueId": 10,
+    "createdAt": "2021-01-01T12:02:00Z",
+    "body": "It would be great to have a dark mode option in the app. 02",
+    "meta": {
+      "from": [
+        {
+          "address": "jane@example.com"
+        }
+      ],
+      "type": "user-reply",
+      "replyTo": [
+        {
+          "address": "support@example.com"
+        }
+      ]
+    }
+  },
+  {
+    "id": 3,
+    "issueId": 10,
+    "createdAt": "2021-01-01T12:03:00Z",
+    "body": "The total cost in the shopping cart is not calculated correctly.03",
+    "meta": {
+      "from": [
+        {
+          "address": "anonymous@example.com"
+        }
+      ],
+      "type": "internal-note",
+      "ccReceivers": [
+        {
+          "address": "devteam@example.com"
+        }
+      ]
+    }
+  }
+]

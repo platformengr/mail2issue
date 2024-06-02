@@ -50,6 +50,11 @@ jest.mock(
 
 describe("Mail2Issue sync incoming", () => {
   beforeEach(() => {
+    // Mock the current date
+    const currentDate = new Date("2022-01-01T00:00:00Z");
+    jest.spyOn(global, "Date").mockImplementation(() => currentDate);
+  });
+  afterEach(() => {
     jest.clearAllMocks();
   });
   it("should get create 3 issues", async () => {
@@ -133,6 +138,7 @@ describe("Mail2Issue sync incoming", () => {
     expect(issueProvider.createIssueComment).toHaveBeenCalledWith({
       issueId: 10001,
       body: newFixture.VisibleText,
+      createdAt: new Date("2022-01-01T00:00:00Z"),
       meta: {
         type: "user-reply",
         from: [{ address: "sender1@example.com", name: "Sender One" }],
