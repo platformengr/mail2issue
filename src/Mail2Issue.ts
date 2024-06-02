@@ -121,16 +121,19 @@ export default class Mail2Issue {
   };
 
   private flattenToEmails = (meta: Meta) => {
-    if (!(meta?.from && meta.ccReceivers && meta.ccReceivers.length > 0))
-      throw new Error("Meta or From or toReceivers is missing");
-    const contacts = [...(meta.from ?? []), ...(meta.toReceivers ?? [])].map(
-      (e) => e.address,
-    );
-    const replyTo = meta.replyTo?.map((e) => e.address) ?? [];
-    contacts.push(...replyTo);
-    const uniqueContacts = [...new Set(contacts)];
+    const contacts = [
+      ...(meta?.from ?? []),
+      ...(meta?.toReceivers ?? []),
+    ].map((e) => e.address);
 
-    return uniqueContacts.filter((e) => e !== this.mailbox.emailAddress); //remove our own email address
+    const replyTo = meta?.replyTo?.map((e) => e.address) ?? [];
+    const uniqueContacts = [...new Set([...contacts, ...replyTo])];
+
+    const toSendEmails = uniqueContacts.filter((e) => e !== this.mailbox.emailAddress); //remove our own email address
+
+    if (toSendEmails.length < 1) throw new Error("No email address found to send email");
+
+    return toSendEmails
   };
 
   private processInternalComment = async (comment: Comment) => {

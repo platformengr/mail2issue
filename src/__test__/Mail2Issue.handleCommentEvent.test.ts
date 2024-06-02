@@ -47,6 +47,7 @@ jest.mock(
     __esModule: true, //When module has multiple exports
     default: jest.fn().mockImplementation(() => ({
       sendEmail: jest.fn(() => Promise.resolve()),
+      emailAddress: "mailserver@mm.com",
     })),
   })),
 );
