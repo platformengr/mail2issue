@@ -83,6 +83,7 @@ async function handleIssueAction(mail2Issue: Mail2Issue) {
       issueId: payload.issue!.number,
       id: payload.comment!.id,
       body: payload.comment!.body,
+      createdAt: payload.comment!.created_at ?? new Date().toISOString(),
       meta: {
         type: MessageTypes.AgentReply,
         from: [
