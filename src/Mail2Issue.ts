@@ -1,7 +1,7 @@
 import MailProvider, { FetchedEmail } from "./MailProvider";
 import IssueProvider from "./IssueProvider";
 import StateProvider from "./StateProvider";
-import { Comment, MessageTypes, Meta } from "./types";
+import { Comment, Issue, MessageTypes, Meta } from "./types";
 
 const NUMBER_OF_EMAILS = 10; //Not To Blast GitHub
 const DAYS_BACK = 1;
@@ -83,26 +83,7 @@ export default class Mail2Issue {
     else await this.handleNewTicket(mail);
   };
 
-  /**
-   * Synchronizes incoming emails.
-   *
-   * @returns A promise that resolves to void.
-   */
-  public syncIncoming = async () => {
-    const lastUid = await this.state.lastUidSynced.get();
-    const incoming = lastUid
-      ? await this.getIncomingByUid(lastUid)
-      : await this.getIncomingByDays(DAYS_BACK);
-
-    if (incoming.length === 0) return;
-
-    await this.state.lastSynced.set(new Date().toISOString());
-    incoming.sort((a, b) => a.uid - b.uid);
-    await this.state.lastUidSynced.set(incoming.slice(-1)[0].uid.toString());
-
-    const promise = incoming.map(this.handleIncoming);
-    await Promise.all(promise);
-  };
+  
 
   private replyTitle = (title: string, issueId: number) =>
     `Re: [:${issueId}] ${title}`; //example: `Re: [:123] Problem with the app`
@@ -141,6 +122,80 @@ export default class Mail2Issue {
     commentCopy.meta.type = MessageTypes.InternalNote;
     await this.issueProvider.createIssueComment(commentCopy);
   };
+  
+
+  private async processAgentAnswer(comment: Comment) {
+    const issue = await this.issueProvider.getIssue(comment.issueId);
+
+    const title = this.replyTitle(issue.title, comment.issueId);
+
+    const mailBody = await this.renderEmailBody(comment, issue);
+      
+
+    this.mailbox.sendEmail({
+      to: this.flattenToEmails(issue.meta),
+      cc: issue.meta?.ccReceivers?.map((e) => e.address) ?? undefined,
+      subject: title,
+      text: mailBody,
+    });
+  }
+
+  private async renderEmailBody(comment: Comment, issue: Issue) {
+    const commentCopy = structuredClone(comment);
+    commentCopy.meta.type = MessageTypes.AgentReply;
+    this.issueProvider.createIssueComment(commentCopy);
+
+    const olderComments = await this.issueProvider.getIssueComments(
+      comment.issueId
+    );
+
+    const userFacingComments = olderComments.filter(c => c.meta.type !== MessageTypes.InternalNote);
+
+    userFacingComments.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+
+    const commentsHistory = userFacingComments
+      .map((e) => {
+        const user = e.meta.from[0].name ?? e.meta.from[0].address;
+        const date = e.createdAt;
+        return `\n---\nFrom: ${user}\nDate:${date}\n${e.body}\n`;
+      })
+      .join("\n");
+
+    const issueUser = issue.meta.from[0].name ?? issue.meta.from[0].address;
+    const OriginalIssue = `\n---\nOriginal Issues:\nFrom: ${issueUser}\nDate: ${issue.createdAt}\nSubject: ${issue.title}\n\n${issue.body}\n`;
+
+    const bodyForEmail = this.removeCommands(comment.body);
+    const mailBody = bodyForEmail +
+      commentsHistory +
+      OriginalIssue;
+    return mailBody;
+  }
+
+
+
+  /**
+   * Synchronizes incoming emails.
+   *
+   * @returns A promise that resolves to void.
+   */
+  public syncIncoming = async () => {
+    const lastUid = await this.state.lastUidSynced.get();
+    const incoming = lastUid
+      ? await this.getIncomingByUid(lastUid)
+      : await this.getIncomingByDays(DAYS_BACK);
+
+    if (incoming.length === 0) return;
+
+    await this.state.lastSynced.set(new Date().toISOString());
+    incoming.sort((a, b) => a.uid - b.uid);
+    await this.state.lastUidSynced.set(incoming.slice(-1)[0].uid.toString());
+
+    const promise = incoming.map(this.handleIncoming);
+    await Promise.all(promise);
+  };
+
   /**
    * Handles the comment event.
    *
@@ -152,44 +207,4 @@ export default class Mail2Issue {
       await this.processInternalComment(comment);
     else await this.processAgentAnswer(comment);
   };
-
-  private async processAgentAnswer(comment: Comment) {
-    const issue = await this.issueProvider.getIssue(comment.issueId);
-
-    const commentCopy = structuredClone(comment);
-    commentCopy.meta.type = MessageTypes.AgentReply;
-    this.issueProvider.createIssueComment(commentCopy);
-
-    const olderComments = await this.issueProvider.getIssueComments(
-      comment.issueId,
-    );
-
-    olderComments.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
-
-    const comments = olderComments
-      .map((e) => {
-        const user = e.meta.from[0].name ?? e.meta.from[0].address;
-        const date = e.createdAt;
-        return `\n---\nFrom: ${user}\nDate:${date}\n${e.body}\n`;
-      })
-      .join("\n");
-
-    const issueUser = issue.meta.from[0].name ?? issue.meta.from[0].address;
-    const bodyForEmail = this.removeCommands(comment.body);
-    const mailBody =
-      bodyForEmail +
-      comments +
-      `\n---\nOriginal Issues:\nFrom: ${issueUser}\nDate: ${issue.createdAt}\nSubject: ${issue.title}\n\n${issue.body}\n`;
-
-    const title = this.replyTitle(issue.title, comment.issueId);
-    this.mailbox.sendEmail({
-      to: this.flattenToEmails(issue.meta),
-      cc: issue.meta?.ccReceivers?.map((e) => e.address) ?? undefined,
-      subject: title,
-      text: mailBody,
-    });
-  }
 }

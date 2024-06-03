@@ -51,7 +51,7 @@
           "address": "anonymous@example.com"
         }
       ],
-      "type": "internal-note",
+      "type": "agent-reply",
       "ccReceivers": [
         {
           "address": "devteam@example.com"
