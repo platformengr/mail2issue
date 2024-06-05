@@ -61,7 +61,7 @@ describe("Mail2Issue sync incoming", () => {
     const mailProvider = new MailProvider({
       emailAddress: "abc@efg.com",
       password: "1234",
-      host: "mail.server.com",
+      imap: "mail.server.com",
     });
     const issueProvider = new IssueProvider("token");
     const stateProvider = new StateProvider("token");
@@ -96,7 +96,7 @@ describe("Mail2Issue sync incoming", () => {
     const mailProvider = new MailProvider({
       emailAddress: "abc@efg.com",
       password: "1234",
-      host: "mail.server.com",
+      imap: "mail.server.com",
     });
     const issueProvider = new IssueProvider("token");
     const mail2Issue = new Mail2Issue(
@@ -115,7 +115,7 @@ describe("Mail2Issue sync incoming", () => {
     const mailProvider = new MailProvider({
       emailAddress: "abc@efg.com",
       password: "1234",
-      host: "mail.server.com",
+      imap: "mail.server.com",
     });
     const newFixture = {
       ...fixture[0],

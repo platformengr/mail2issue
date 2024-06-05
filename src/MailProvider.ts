@@ -6,43 +6,71 @@ import EmailReplyParser from "email-reply-parser";
 export interface MailProviderOptions {
   emailAddress: string;
   password: string;
-  host: string;
-  imap?: { port?: number; tls?: boolean };
-  smtp?: {
-    host?: string;
-    port?: number;
-    auth?: { user?: string; pass?: string };
-  };
+  imap: string | { host?: string; port?: number; tls?: boolean };
+  smtp?:
+    | string
+    | {
+        host?: string;
+        port?: number;
+        auth?: { user?: string; pass?: string };
+      };
 }
 
 export default class MailProvider {
   public readonly emailAddress: string;
   private readonly password: string;
-  private readonly host: string;
+
   private readonly imap: Imap;
   private readonly transporter: nodemailer.Transporter;
 
   constructor(config: MailProviderOptions) {
     this.emailAddress = config.emailAddress;
     this.password = config.password;
-    this.host = config.host;
+
+    const imapHost =
+      typeof config.imap === "string" ? config.imap : config.imap?.host;
+    if (!imapHost) {
+      throw new Error("IMAP host is required");
+    }
+    const smtpHost =
+      typeof config.smtp === "string"
+        ? config.smtp
+        : config.smtp?.host ?? imapHost;
 
     this.imap = new Imap({
       user: this.emailAddress,
       password: this.password,
-      host: this.host,
-
-      port: config.imap?.port ?? 993,
-      tls: config.imap?.tls ?? true,
+      host: imapHost,
+      port:
+        typeof config.imap !== "string" && config.imap.port
+          ? config.imap.port
+          : 993,
+      tls:
+        typeof config.imap !== "string" && config.imap.tls
+          ? config.imap.tls
+          : true,
     });
 
+    const isSmtpObject = typeof config.smtp !== "string";
+    const objSmtp = config.smtp as {
+      host?: string;
+      port?: number;
+      auth?: { user?: string; pass?: string };
+    };
+    const smtpPort = isSmtpObject && objSmtp.port ? objSmtp.port : 465;
     this.transporter = nodemailer.createTransport({
-      host: config.smtp?.host ?? this.host,
-      port: config.smtp?.port ?? 587,
-      secure: config.smtp?.port === 465 ? true : false, // https://nodemailer.com/about/
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465, // https://nodemailer.com/about/
       auth: {
-        user: config.smtp?.auth?.user ?? config.emailAddress,
-        pass: config.smtp?.auth?.pass ?? config.password,
+        user:
+          isSmtpObject && objSmtp.auth?.user
+            ? objSmtp.auth?.user
+            : this.emailAddress,
+        pass:
+          isSmtpObject && objSmtp.auth?.pass
+            ? objSmtp.auth?.pass
+            : this.password,
       },
     });
   }

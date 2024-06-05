@@ -104,7 +104,7 @@ const createMail2IssueInstance = () => {
   const mailProvider = new MailProvider({
     emailAddress: "abc@efg.com",
     password: "1234",
-    host: "mail.server.com",
+    imap: "mail.server.com",
   });
 
   const issueProvider = new IssueProvider("token");
@@ -151,7 +151,10 @@ describe("Mail2Issue handleCommentEvent", () => {
     expect(issueProvider.createIssueComment).toHaveBeenCalledTimes(1);
     expect(issueProvider.createIssueComment).toHaveBeenCalledWith(expected);
     expect(mailProvider.sendEmail).toHaveBeenCalledTimes(1);
-    const sampleReply = fs.readFileSync("src/__test__/fixtures/sampleReply.txt", "utf-8");
+    const sampleReply = fs.readFileSync(
+      "src/__test__/fixtures/sampleReply.txt",
+      "utf-8",
+    );
     expect(mailProvider.sendEmail).toHaveBeenCalledWith({
       to: ["email1", "email2", "email4"],
       cc: ["email3"],
@@ -160,34 +163,36 @@ describe("Mail2Issue handleCommentEvent", () => {
     });
   });
   it("internal comments should not be included int the agent answer email", async () => {
-
-    const { mail2Issue, issueProvider, mailProvider} = createMail2IssueInstance();
+    const { mail2Issue, issueProvider, mailProvider } =
+      createMail2IssueInstance();
     const commentCopy = structuredClone(issuesCommentsFixture);
     commentCopy[0].meta.type = MessageTypes.InternalNote;
     commentCopy[1].meta.type = MessageTypes.InternalNote;
     commentCopy[2].meta.type = MessageTypes.InternalNote;
     jest
-    .spyOn(issueProvider, "getIssueComments")
-    .mockImplementation(() => Promise.resolve(commentCopy as unknown as Comment[] ));
+      .spyOn(issueProvider, "getIssueComments")
+      .mockImplementation(() =>
+        Promise.resolve(commentCopy as unknown as Comment[]),
+      );
     const comment = {
       ...commentFixture,
       body: " This is a comment",
-    } ;
+    };
 
     await mail2Issue.handleCommentEvent(comment);
     expect(mailProvider.sendEmail).toHaveBeenCalledWith({
-      to: [ 'email1', 'email2', 'email4' ],
-      cc: [ 'email3' ],
-      subject: 'Re: [:10001] Issue Title',
-      text: ' This is a comment\n' +
-        '---\n' +
-        'Original Issues:\n' +
-        'From: use1\n' +
-        'Date: 2021-01-01T12:00:00Z\n' +
-        'Subject: Issue Title\n' +
-        '\n' +
-        'This is an issue\n'
+      to: ["email1", "email2", "email4"],
+      cc: ["email3"],
+      subject: "Re: [:10001] Issue Title",
+      text:
+        " This is a comment\n" +
+        "---\n" +
+        "Original Issues:\n" +
+        "From: use1\n" +
+        "Date: 2021-01-01T12:00:00Z\n" +
+        "Subject: Issue Title\n" +
+        "\n" +
+        "This is an issue\n",
     });
   });
-
 });

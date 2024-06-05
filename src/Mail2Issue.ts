@@ -83,8 +83,6 @@ export default class Mail2Issue {
     else await this.handleNewTicket(mail);
   };
 
-  
-
   private replyTitle = (title: string, issueId: number) =>
     `Re: [:${issueId}] ${title}`; //example: `Re: [:123] Problem with the app`
   private findCommands = (body: string) => {
@@ -102,19 +100,21 @@ export default class Mail2Issue {
   };
 
   private flattenToEmails = (meta: Meta) => {
-    const contacts = [
-      ...(meta?.from ?? []),
-      ...(meta?.toReceivers ?? []),
-    ].map((e) => e.address);
+    const contacts = [...(meta?.from ?? []), ...(meta?.toReceivers ?? [])].map(
+      (e) => e.address,
+    );
 
     const replyTo = meta?.replyTo?.map((e) => e.address) ?? [];
     const uniqueContacts = [...new Set([...contacts, ...replyTo])];
 
-    const toSendEmails = uniqueContacts.filter((e) => e !== this.mailbox.emailAddress); //remove our own email address
+    const toSendEmails = uniqueContacts.filter(
+      (e) => e !== this.mailbox.emailAddress,
+    ); //remove our own email address
 
-    if (toSendEmails.length < 1) throw new Error("No email address found to send email");
+    if (toSendEmails.length < 1)
+      throw new Error("No email address found to send email");
 
-    return toSendEmails
+    return toSendEmails;
   };
 
   private processInternalComment = async (comment: Comment) => {
@@ -122,7 +122,6 @@ export default class Mail2Issue {
     commentCopy.meta.type = MessageTypes.InternalNote;
     await this.issueProvider.createIssueComment(commentCopy);
   };
-  
 
   private async processAgentAnswer(comment: Comment) {
     const issue = await this.issueProvider.getIssue(comment.issueId);
@@ -130,7 +129,6 @@ export default class Mail2Issue {
     const title = this.replyTitle(issue.title, comment.issueId);
 
     const mailBody = await this.renderEmailBody(comment, issue);
-      
 
     this.mailbox.sendEmail({
       to: this.flattenToEmails(issue.meta),
@@ -146,13 +144,16 @@ export default class Mail2Issue {
     this.issueProvider.createIssueComment(commentCopy);
 
     const olderComments = await this.issueProvider.getIssueComments(
-      comment.issueId
+      comment.issueId,
     );
 
-    const userFacingComments = olderComments.filter(c => c.meta.type !== MessageTypes.InternalNote);
+    const userFacingComments = olderComments.filter(
+      (c) => c.meta.type !== MessageTypes.InternalNote,
+    );
 
     userFacingComments.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
 
     const commentsHistory = userFacingComments
@@ -167,13 +168,9 @@ export default class Mail2Issue {
     const OriginalIssue = `\n---\nOriginal Issues:\nFrom: ${issueUser}\nDate: ${issue.createdAt}\nSubject: ${issue.title}\n\n${issue.body}\n`;
 
     const bodyForEmail = this.removeCommands(comment.body);
-    const mailBody = bodyForEmail +
-      commentsHistory +
-      OriginalIssue;
+    const mailBody = bodyForEmail + commentsHistory + OriginalIssue;
     return mailBody;
   }
-
-
 
   /**
    * Synchronizes incoming emails.
