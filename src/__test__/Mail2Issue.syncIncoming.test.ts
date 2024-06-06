@@ -4,6 +4,7 @@ import Mail2Issue from "../Mail2Issue";
 import MailProvider, { FetchedEmail } from "../MailProvider";
 import IssueProvider from "../IssueProvider";
 import StateProvider from "../StateProvider";
+import FileStorageProvider from "../FileStorageProvider";
 
 jest.mock(
   "../MailProvider",
@@ -48,6 +49,8 @@ jest.mock(
   })),
 );
 
+jest.mock("../FileStorageProvider");
+
 describe("Mail2Issue sync incoming", () => {
   beforeEach(() => {
     // Mock the current date
@@ -65,10 +68,14 @@ describe("Mail2Issue sync incoming", () => {
     });
     const issueProvider = new IssueProvider("token");
     const stateProvider = new StateProvider("token");
+    const fileStorageProvider = new FileStorageProvider();
+    const config = { storeFiles: false };
     const mail2Issue = new Mail2Issue(
       mailProvider,
       issueProvider,
       stateProvider,
+      fileStorageProvider,
+      config,
     );
     await mail2Issue.syncIncoming();
     expect(mailProvider.fetchEmailsByUID).toHaveBeenCalledTimes(1);
@@ -99,10 +106,14 @@ describe("Mail2Issue sync incoming", () => {
       imap: "mail.server.com",
     });
     const issueProvider = new IssueProvider("token");
+    const fileStorageProvider = new FileStorageProvider();
+    const config = { storeFiles: false };
     const mail2Issue = new Mail2Issue(
       mailProvider,
       issueProvider,
       stateProvider,
+      fileStorageProvider,
+      config,
     );
     await mail2Issue.syncIncoming();
 
@@ -127,10 +138,14 @@ describe("Mail2Issue sync incoming", () => {
 
     const issueProvider = new IssueProvider("token");
     const stateProvider = new StateProvider("token");
+    const fileStorageProvider = new FileStorageProvider();
+    const config = { storeFiles: false };
     const mail2Issue = new Mail2Issue(
       mailProvider,
       issueProvider,
       stateProvider,
+      fileStorageProvider,
+      config,
     );
     await mail2Issue.syncIncoming();
 

@@ -265,5 +265,24 @@ export interface FetchedEmail {
   text?: string;
   VisibleText?: any;
   date: Date;
-  attachments?: any[];
+  attachments?: Attachment[];
 }
+
+type Attachment = {
+  type: string;
+  content: Buffer;
+  contentType: string;
+  partId?: string;
+  release?: any;
+  contentDisposition: string;
+  filename: string;
+  headers: Map<
+    string,
+    {
+      value: string;
+      params: object;
+    }
+  >;
+  checksum: string;
+  size: number;
+};

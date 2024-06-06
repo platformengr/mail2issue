@@ -3,8 +3,9 @@ import * as github from "@actions/github";
 import StateProvider from "./StateProvider";
 import IssueProvider from "./IssueProvider";
 import MailProvider, { MailProviderOptions } from "./MailProvider";
-import Mail2Issue from "./Mail2Issue";
+import Mail2Issue, { Config } from "./Mail2Issue";
 import { MessageTypes } from "./types";
+import FileStorageProvider from "./FileStorageProvider";
 
 /**
  * Runs the main logic of the action.
@@ -24,10 +25,20 @@ async function run() {
     core.getInput("mail-config"),
   ) as MailProviderOptions;
 
+  const config: Config = {
+    storeFiles: true,
+  };
   const issueProvider = new IssueProvider(token);
   const stateProvider = new StateProvider(token);
   const mailProvider = new MailProvider(mailConfig);
-  const mail2Issue = new Mail2Issue(mailProvider, issueProvider, stateProvider);
+  const fileStorageProvider = new FileStorageProvider();
+  const mail2Issue = new Mail2Issue(
+    mailProvider,
+    issueProvider,
+    stateProvider,
+    fileStorageProvider,
+    config,
+  );
 
   if (task === "sync") await mail2Issue.syncIncoming();
   else if (task === "issueAction") await handleIssueAction(mail2Issue);

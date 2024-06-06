@@ -5,6 +5,7 @@ import StateProvider from "../StateProvider";
 import { MessageTypes, Comment } from "../types";
 import issuesCommentsFixture from "./fixtures/comments.json";
 import fs from "fs";
+import FileStorageProvider from "../FileStorageProvider";
 
 const IssueFixture = {
   id: 10001,
@@ -85,6 +86,8 @@ jest.mock(
   })),
 );
 
+jest.mock("../FileStorageProvider");
+
 const commentFixture: Comment = {
   issueId: 10001,
   body: "This is a comment",
@@ -109,7 +112,15 @@ const createMail2IssueInstance = () => {
 
   const issueProvider = new IssueProvider("token");
   const stateProvider = new StateProvider("token");
-  const mail2Issue = new Mail2Issue(mailProvider, issueProvider, stateProvider);
+  const fileStorageProvider = new FileStorageProvider();
+  const config = { storeFiles: false };
+  const mail2Issue = new Mail2Issue(
+    mailProvider,
+    issueProvider,
+    stateProvider,
+    fileStorageProvider,
+    config,
+  );
   return { mail2Issue, mailProvider, issueProvider, stateProvider };
 };
 
