@@ -54,8 +54,8 @@ export default class FileStorageProvider {
     const files = filenames.map((f) => `"${f}"`).join(" ");
 
     const commands = [
-      `git config user.name github-actions[bot];\n`,
-      `git config user.email 41898282+github-actions[bot]@users.noreply.github.com;\n`,
+      `git config user.name="github-actions[bot]";\n`,
+      `git config user.email="41898282+github-actions[bot]@users.noreply.github.com";\n`,
       `git checkout --orphan ${branchName};\n`,
       `git rm -rf .;\n`,
       `git add ${files};\n`,
