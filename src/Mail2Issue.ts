@@ -2,7 +2,7 @@ import MailProvider, { FetchedEmail } from "./MailProvider";
 import IssueProvider from "./IssueProvider";
 import StateProvider from "./StateProvider";
 import { Comment, Issue, MessageTypes, Meta } from "./types";
-import FileStorageProvider from "./FileStorageProvider";
+import FileStorageProvider from "./FileStorageProvider.ts1";
 
 const NUMBER_OF_EMAILS = 10; //Not To Blast GitHub
 const DAYS_BACK = 1;
