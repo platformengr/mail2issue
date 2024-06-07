@@ -58,8 +58,8 @@ export default class FileStorageProvider {
 
     const commands = [
       `gh auth login --with-token ${this.token};\n`,
-      //`git config --global user.email github-actions[bot];\n`,
-      //`git config --global user.name 41898282+github-actions[bot]@users.noreply.github.com;\n`,
+      `git config --global user.email daniel@abrahamberg.com;\n`,
+      `git config --global user.name abrahamberg;\n`,
       `git checkout --orphan ${branchName};\n`,
       `git rm -rf .;\n`,
       `git add ${files};\n`,
