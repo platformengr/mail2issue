@@ -5,7 +5,7 @@ import IssueProvider from "./IssueProvider";
 import MailProvider, { MailProviderOptions } from "./MailProvider";
 import Mail2Issue, { Config } from "./Mail2Issue";
 import { MessageTypes } from "./types";
-import FileStorageProvider from "./FileStorageProvider.ts";
+import FileStorageProvider from "./FileStorageProvider";
 
 /**
  * Runs the main logic of the action.

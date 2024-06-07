@@ -5,7 +5,7 @@ import StateProvider from "../StateProvider";
 import { MessageTypes, Comment } from "../types";
 import issuesCommentsFixture from "./fixtures/comments.json";
 import fs from "fs";
-import FileStorageProvider from "../FileStorageProvider.ts";
+import FileStorageProvider from "../FileStorageProvider";
 
 const IssueFixture = {
   id: 10001,

@@ -4,7 +4,7 @@ import Mail2Issue from "../Mail2Issue";
 import MailProvider, { FetchedEmail } from "../MailProvider";
 import IssueProvider from "../IssueProvider";
 import StateProvider from "../StateProvider";
-import FileStorageProvider from "../FileStorageProvider.ts";
+import FileStorageProvider from "../FileStorageProvider";
 
 jest.mock(
   "../MailProvider",

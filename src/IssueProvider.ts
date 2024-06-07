@@ -15,7 +15,7 @@ export default class IssueProvider {
   }
 
   private formatMeta(meta: Meta) {
-    if (!meta || !meta.from || !meta.from[0])
+    if (!meta?.from?.[0])
       throw new Error("Meta is undefined");
 
     const senderHasName = !!meta.from[0].name;
