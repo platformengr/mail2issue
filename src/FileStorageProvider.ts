@@ -48,17 +48,19 @@ export default class FileStorageProvider {
   ): Promise<void> {
     const issueFolder = `issue-attachments/${issueId}`;
     const branchName = !commentId
-      ? `${issueFolder} s`
+      ? `${issueFolder}`
       : `${issueFolder}/${commentId}`;
 
+    const files = filenames.map((f) => `"${f}"`).join(" ");
+
     const commands = [
-      `git config user.name github-actions[bot];`,
-      `git config user.email 41898282+github-actions[bot]@users.noreply.github.com;`,
-      `git checkout — orphan ${branchName}`,
-      `git rm -rf .`,
-      `git add ${filenames.join(" ")}`,
-      `git commit -m "${branchName.replace(/\//g, " ")}"`,
-      `git push origin ${branchName}`,
+      `git config user.name github-actions[bot];\n`,
+      `git config user.email 41898282+github-actions[bot]@users.noreply.github.com;\n`,
+      `git checkout —orphan ${branchName};\n`,
+      `git rm -rf .;\n`,
+      `git add ${files};\n`,
+      `git commit -m "${branchName.replace(/\//g, " ")}";\n`,
+      `git push origin ${branchName};\n`,
     ];
 
     const commandPromise = new Promise<void>((resolve, reject) =>
