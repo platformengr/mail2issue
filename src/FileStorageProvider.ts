@@ -56,11 +56,11 @@ export default class FileStorageProvider {
     const commands = [
       `git config user.name github-actions[bot];\n`,
       `git config user.email 41898282+github-actions[bot]@users.noreply.github.com;\n`,
-      `git checkout —orphan ${branchName};\n`,
+      `git checkout --orphan ${branchName};\n`,
       `git rm -rf .;\n`,
       `git add ${files};\n`,
       `git commit -m "${branchName.replace(/\//g, " ")}";\n`,
-      `git push origin ${branchName};\n`,
+      `git push --set-upstream  origin ${branchName};\n`,
     ];
 
     const commandPromise = new Promise<void>((resolve, reject) =>
