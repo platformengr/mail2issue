@@ -18,7 +18,10 @@ type savedFiles = {
 };
 
 export default class FileStorageProvider {
-  constructor() {} // should not need token as it runs commands on the runner.
+  token: string;
+  constructor(token:string) {
+    this.token = token;
+  } 
 
   public async saveFiles(
     issueAttachments: IssueAttachments,
@@ -54,6 +57,7 @@ export default class FileStorageProvider {
     const files = filenames.map((f) => `"${f}"`).join(" ");
 
     const commands = [
+      `gh auth login --with-token ${this.token};\n`,
       `git config --global user.email github-actions[bot];\n`,
       `git config --global user.name 41898282+github-actions[bot]@users.noreply.github.com;\n`,
       `git checkout --orphan ${branchName};\n`,

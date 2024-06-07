@@ -68,7 +68,7 @@ describe("Mail2Issue sync incoming", () => {
     });
     const issueProvider = new IssueProvider("token");
     const stateProvider = new StateProvider("token");
-    const fileStorageProvider = new FileStorageProvider();
+    const fileStorageProvider = new FileStorageProvider("token");
     const config = { storeFiles: false };
     const mail2Issue = new Mail2Issue(
       mailProvider,
@@ -106,7 +106,7 @@ describe("Mail2Issue sync incoming", () => {
       imap: "mail.server.com",
     });
     const issueProvider = new IssueProvider("token");
-    const fileStorageProvider = new FileStorageProvider();
+    const fileStorageProvider = new FileStorageProvider("token");
     const config = { storeFiles: false };
     const mail2Issue = new Mail2Issue(
       mailProvider,
@@ -138,7 +138,7 @@ describe("Mail2Issue sync incoming", () => {
 
     const issueProvider = new IssueProvider("token");
     const stateProvider = new StateProvider("token");
-    const fileStorageProvider = new FileStorageProvider();
+    const fileStorageProvider = new FileStorageProvider("token");
     const config = { storeFiles: false };
     const mail2Issue = new Mail2Issue(
       mailProvider,

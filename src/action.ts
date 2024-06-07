@@ -31,7 +31,7 @@ async function run() {
   const issueProvider = new IssueProvider(token);
   const stateProvider = new StateProvider(token);
   const mailProvider = new MailProvider(mailConfig);
-  const fileStorageProvider = new FileStorageProvider();
+  const fileStorageProvider = new FileStorageProvider("token");
   const mail2Issue = new Mail2Issue(
     mailProvider,
     issueProvider,

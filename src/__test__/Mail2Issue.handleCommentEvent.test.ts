@@ -112,7 +112,7 @@ const createMail2IssueInstance = () => {
 
   const issueProvider = new IssueProvider("token");
   const stateProvider = new StateProvider("token");
-  const fileStorageProvider = new FileStorageProvider();
+  const fileStorageProvider = new FileStorageProvider("token");
   const config = { storeFiles: false };
   const mail2Issue = new Mail2Issue(
     mailProvider,
