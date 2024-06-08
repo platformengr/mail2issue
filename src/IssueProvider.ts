@@ -142,7 +142,6 @@ export default class IssueProvider {
    * @throws Error if the issue body is empty.
    */
   public async getIssue(id: number): Promise<Issue> {
-    console.log("issue_number", id);
     const issue = await this.octokit.rest.issues.get({
       ...this.base,
       issue_number: id,
