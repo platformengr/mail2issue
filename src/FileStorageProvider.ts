@@ -57,9 +57,6 @@ export default class FileStorageProvider {
     const files = filenames.map((f) => `"${f}"`).join(" ");
 
     const commands = [
-      `gh auth login --with-token ${this.token};\n`,
-      `git config --global user.email daniel@abrahamberg.com;\n`,
-      `git config --global user.name abrahamberg;\n`,
       `git checkout --orphan ${branchName};\n`,
       `git rm -rf .;\n`,
       `git add ${files};\n`,
