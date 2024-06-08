@@ -1,6 +1,8 @@
 // Git based implementation of the file storage provider
 import * as fs from "node:fs/promises";
 import { exec } from "child_process";
+import * as github from "@actions/github";
+
 
 type FileBuffer = {
   content: Buffer;
@@ -19,8 +21,12 @@ type savedFiles = {
 
 export default class FileStorageProvider {
   token: string;
+  owner: string;
+  repo: string;
   constructor(token:string) {
     this.token = token;
+    this.owner = github.context.repo.owner,
+    this.repo = github.context.repo.repo,
   } 
 
   public async saveFiles(
@@ -35,10 +41,10 @@ export default class FileStorageProvider {
       issueAttachments.issueId,
       issueAttachments.commentId,
     );
-
+    const base = `https://github.com/${this.owner}/${this.repo}`;
     return issueAttachments.attachments.map((a) => ({
       filename: a.filename,
-      url: `/blob/${issueAttachments.issueId}/${a.filename}?raw=true`,
+      url: encodeURIComponent(`${base}/blob/${issueAttachments.issueId}/${a.filename}?raw=true`),
     }));
   }
   private async saveFileOnCurrentAgent(files: FileBuffer): Promise<void> {
