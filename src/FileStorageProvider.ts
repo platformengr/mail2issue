@@ -25,8 +25,8 @@ export default class FileStorageProvider {
   repo: string;
   constructor(token:string) {
     this.token = token;
-    this.owner = github.context.repo.owner,
-    this.repo = github.context.repo.repo,
+    this.owner = github.context.repo.owner;
+    this.repo = github.context.repo.repo;
   } 
 
   public async saveFiles(
