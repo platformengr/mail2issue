@@ -114,6 +114,7 @@ export default class IssueProvider {
       title,
       body: this.bodyWithMetaFormat(body, meta),
     });
+    console.log("newIssue", JSON.stringify(newIssue.data));
     return newIssue.data.id;
   }
 
@@ -238,6 +239,7 @@ export default class IssueProvider {
 
 
 import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
+import { json } from "stream/consumers";
 
 type IssueComment =
   RestEndpointMethodTypes["issues"]["getComment"]["response"]["data"];
