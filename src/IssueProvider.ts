@@ -1,6 +1,7 @@
 import * as github from "@actions/github";
 import { CreateIssue, Meta, Comment, MessageTypes, Issue } from "./types";
 import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
+import { get } from "http";
 
 type IssueComment =
   RestEndpointMethodTypes["issues"]["getComment"]["response"]["data"];
@@ -141,6 +142,7 @@ export default class IssueProvider {
    * @throws Error if the issue body is empty.
    */
   public async getIssue(id: number): Promise<Issue> {
+    console.log("issue_number", id);
     const issue = await this.octokit.rest.issues.get({
       ...this.base,
       issue_number: id,
@@ -151,7 +153,7 @@ export default class IssueProvider {
     const { meta, cleanBody } = this.extractMeta(bodyWithMeta);
 
     return {
-      id: issue.data.id,
+      id: issue.data.number,
       title: issue.data.title,
       body: cleanBody,
       meta: meta,
