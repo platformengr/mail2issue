@@ -114,8 +114,7 @@ export default class IssueProvider {
       title,
       body: this.bodyWithMetaFormat(body, meta),
     });
-    console.log("newIssue", JSON.stringify(newIssue.data));
-    return newIssue.data.id;
+    return newIssue.data.number;
   }
 
   /**
