@@ -1,5 +1,9 @@
 import * as github from "@actions/github";
 import { CreateIssue, Meta, Comment, MessageTypes, Issue } from "./types";
+import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
+
+type IssueComment =
+  RestEndpointMethodTypes["issues"]["getComment"]["response"]["data"];
 
 
 export default class IssueProvider {
@@ -237,8 +241,3 @@ export default class IssueProvider {
 
 
 
-import { RestEndpointMethodTypes } from "@octokit/plugin-rest-endpoint-methods";
-import { json } from "stream/consumers";
-
-type IssueComment =
-  RestEndpointMethodTypes["issues"]["getComment"]["response"]["data"];
