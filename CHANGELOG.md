@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.1.0](https://github.com/platformengr/mail2issue/compare/v1.0.0...v1.1.0) (2024-06-03)
+
+
+### Features
+
+* Improve email metadata handling and formatting ([5582a2c](https://github.com/platformengr/mail2issue/commit/5582a2c48b09632eccf68241605d2d637722b8e8))
+* Refactor handleInternalComment to processInternalComment and update comment meta ([afbcab7](https://github.com/platformengr/mail2issue/commit/afbcab7021817f748e1df51e7394798b83801f94))
+* Refactor types and action logic for Mail2Issue ([03bf096](https://github.com/platformengr/mail2issue/commit/03bf09630b87bed49b0a07e1a60d49543a7ec7c6))
+* skip sending internal message to user ([03f906e](https://github.com/platformengr/mail2issue/commit/03f906e80e84fd1ce3eb7ce14ab112fa8a80e35e))
+
+
+### Bug Fixes
+
+* Add createdAt field to payload comment in handleIssueAction ([1a36e4f](https://github.com/platformengr/mail2issue/commit/1a36e4fd0e8a0ca0bb79fe3e9b80e7c70967d020))
+* Refactor .gitignore to include coverage directory ([b255c0b](https://github.com/platformengr/mail2issue/commit/b255c0b124b7cebf07a3674c069d6d8b71497e39))
+* Refactor handleInternalComment to processInternalComment and update comment meta ([7ce4cfb](https://github.com/platformengr/mail2issue/commit/7ce4cfbae7795a487ce63f298a6febe91df5e3de))
+* reqex ([6480e9d](https://github.com/platformengr/mail2issue/commit/6480e9de6aeaf6667efc9e72f3e6854f11cbc2e3))
+
 ## 1.0.0 (2024-05-29)
 
 ### Features
