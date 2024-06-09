@@ -2,22 +2,32 @@ import MailProvider, { FetchedEmail } from "./MailProvider";
 import IssueProvider from "./IssueProvider";
 import StateProvider from "./StateProvider";
 import { Comment, Issue, MessageTypes, Meta } from "./types";
+import FileStorageProvider from "./FileStorageProvider";
 
 const NUMBER_OF_EMAILS = 10; //Not To Blast GitHub
 const DAYS_BACK = 1;
+export type Config = {
+  storeFiles: boolean;
+};
 export default class Mail2Issue {
   private readonly mailbox: MailProvider;
   private readonly issueProvider;
   private readonly state;
+  private readonly fileStorageProvider;
+  private readonly config;
 
   constructor(
     mail: MailProvider,
     issueProvider: IssueProvider,
     state: StateProvider,
+    fileStorageProvider: FileStorageProvider,
+    config: Config,
   ) {
     this.mailbox = mail;
     this.issueProvider = issueProvider;
     this.state = state;
+    this.fileStorageProvider = fileStorageProvider;
+    this.config = config;
   }
 
   private getIncomingByUid = async (lastSynced: string) => {
@@ -39,7 +49,7 @@ export default class Mail2Issue {
   private handleNewTicket = async (mail: FetchedEmail) => {
     const title = mail.subject ?? "No Subject";
     const body = mail.VisibleText;
-    return await this.issueProvider.createIssue({
+    const issueId = await this.issueProvider.createIssue({
       title,
       body,
       meta: {
@@ -52,6 +62,11 @@ export default class Mail2Issue {
         type: MessageTypes.Original,
       },
     });
+    const mdAttachments = await this.processAttachments(mail, issueId);
+    if (!this.config.storeFiles || !mdAttachments) return;
+    const issue = await this.issueProvider.getIssue(issueId);
+    issue.body += mdAttachments;
+    await this.issueProvider.updateIssue(issue);
   };
 
   private handleReplay = async (mail: FetchedEmail, regex: RegExp) => {
@@ -60,7 +75,7 @@ export default class Mail2Issue {
       throw new Error("could not find issue id in subject :" + mail.subject);
     const issueId = parseInt(match[0].slice(2, -1));
     const body = mail.VisibleText as string;
-    await this.issueProvider.createIssueComment({
+    const id = await this.issueProvider.createIssueComment({
       issueId,
       body,
       createdAt: new Date(),
@@ -74,6 +89,11 @@ export default class Mail2Issue {
         type: MessageTypes.UserReply,
       },
     });
+    const mdAttachments = await this.processAttachments(mail, issueId, id);
+    if (!this.config.storeFiles || !mdAttachments) return;
+    const comment = await this.issueProvider.getComment({ id, issueId });
+    comment.body += mdAttachments;
+    await this.issueProvider.updateIssueComment(comment);
   };
 
   private handleIncoming = async (mail: FetchedEmail) => {
@@ -122,6 +142,32 @@ export default class Mail2Issue {
     commentCopy.meta.type = MessageTypes.InternalNote;
     await this.issueProvider.createIssueComment(commentCopy);
   };
+
+  private async processAttachments(
+    mail: FetchedEmail,
+    issueId: number,
+    commentId?: number,
+  ) {
+    if (
+      !this.config.storeFiles ||
+      !mail.attachments ||
+      mail.attachments.length < 1
+    )
+      return;
+    const attachments = mail.attachments.map((a) => ({
+      content: a.content,
+      filename: a.filename,
+      commentId,
+    }));
+    const addresses = await this.fileStorageProvider.saveFiles({
+      issueId,
+      attachments,
+    });
+    const mdListOfAttachments = addresses
+      .map((a) => ` - [${a.filename}](${a.url})`)
+      .join("\n ");
+    return `\n\nAttachments: \n ${mdListOfAttachments}`;
+  }
 
   private async processAgentAnswer(comment: Comment) {
     const issue = await this.issueProvider.getIssue(comment.issueId);
