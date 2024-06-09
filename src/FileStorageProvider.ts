@@ -44,7 +44,7 @@ export default class FileStorageProvider {
     const base = `https://github.com/${this.owner}/${this.repo}`;
     return issueAttachments.attachments.map((a) => ({
       filename: a.filename,
-      url: `${base}/blob/${issueAttachments.issueId}/${encodeURIComponent(a.filename)}?raw=true`,
+      url: `${base}/blob/issue-attachments/${issueAttachments.issueId}/${encodeURIComponent(a.filename)}?raw=true`,
     }));
   }
   private async saveFileOnCurrentAgent(files: FileBuffer): Promise<void> {
