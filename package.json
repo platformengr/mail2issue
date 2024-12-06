@@ -1,6 +1,6 @@
 {
   "name": "mail2isseus",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "github action that make issues of emails",
   "main": "index.js",
   "scripts": {
